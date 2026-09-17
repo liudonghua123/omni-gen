@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>omni-gen API 测试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            background: transparent;
+            color: #94a3b8;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tab:hover {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .tab.active {
+            background: #1e293b;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+        .tab .icon {
+            font-size: 1.25rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+        }
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        input[type="text"], textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        input[type="file"] {
+            background: #1e293b;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.success {
+            display: block;
+            background: #064e3b;
+            border: 1px solid #059669;
+        }
+        .result.error {
+            display: block;
+            background: #7f1d1d;
+            border: 1px solid #dc2626;
+        }
+        .result.loading {
+            display: block;
+            background: #1e293b;
+            border: 1px solid #475569;
+        }
+        .result-content {
+            margin-top: 0.5rem;
+        }
+        .result-content p {
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #475569;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+        .row .form-group {
+            flex: 1;
+        }
+        pre {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+        }
+        .api-info {
+            margin-top: 2rem;
+        }
+
+        /* Preview Styles */
+        .preview-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+        .preview-container h3 {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+        }
+        .audio-preview audio {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .image-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            display: block;
+            margin-top: 0.5rem;
+        }
+        .text-preview {
+            margin-top: 0.5rem;
+            padding: 1rem;
+            background: #1e293b;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .download-btn {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: #334155;
+            color: #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        .download-btn:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 omni-gen API 测试</h1>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('tts')">
+                <span class="icon">🔊</span> TTS
+            </button>
+            <button class="tab" onclick="showTab('image')">
+                <span class="icon">🎨</span> 文生图
+            </button>
+            <button class="tab" onclick="showTab('asr')">
+                <span class="icon">🎤</span> ASR
+            </button>
+            <button class="tab" onclick="showTab('mcp')">
+                <span class="icon">🤖</span> MCP
+            </button>
+            <button class="tab" onclick="showTab('api')">
+                <span class="icon">📡</span> API
+            </button>
+        </div>
+
+        <!-- TTS Tab Content -->
+        <div id="tab-tts" class="tab-content active">
+            <!-- Simple URL Section -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
+                <div class="form-group">
+                    <label for="tts-simple-text">文本内容</label>
+                    <input type="text" id="tts-simple-text" placeholder="输入文本，如：你好，世界" value="你好，世界">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="tts-simple-format">音频格式</label>
+                        <select id="tts-simple-format">
+                            <option value="wav">WAV</option>
+                            <option value="mp3">MP3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>生成的 URL</label>
+                    <code id="tts-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                </div>
+                <div class="row">
+                    <button class="btn btn-primary" onclick="testTTSSimple()">🔊 预览音频</button>
+                    <a id="tts-simple-download" class="download-btn" href="#" download>下载音频</a>
+                </div>
+                <div id="tts-simple-preview" class="preview-container" style="display: none; margin-top: 1rem;">
+                    <h3>🔊 音频预览</h3>
+                    <div class="audio-preview">
+                        <audio id="tts-simple-audio" controls></audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REST API Section -->
+            <div class="card">
+                <h2><span class="icon">🔌</span> REST API 方式</h2>
+                <div class="form-group">
+                    <label for="tts-text">文本内容</label>
+                    <textarea id="tts-text" placeholder="输入要转换为语音的文本...">你好，世界！欢迎使用 omni-gen。</textarea>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="tts-format">音频格式</label>
+                        <select id="tts-format">
+                            <option value="wav">WAV</option>
+                            <option value="mp3">MP3</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="testTTS()">生成语音</button>
+                <div id="tts-result" class="result"></div>
+                <div id="tts-preview" class="preview-container" style="display: none;">
+                    <h3>🔊 音频预览</h3>
+                    <div class="audio-preview">
+                        <audio id="tts-audio" controls></audio>
+                    </div>
+                    <a id="tts-download" class="download-btn" href="#" download>下载音频</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Tab Content -->
+        <div id="tab-image" class="tab-content">
+            <!-- Simple URL Section -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
+                <div class="form-group">
+                    <label for="image-simple-prompt">图片描述</label>
+                    <input type="text" id="image-simple-prompt" placeholder="输入图片描述，如：a beautiful sunset" value="a beautiful sunset">
+                </div>
+                <div class="form-group">
+                    <label>生成的 URL</label>
+                    <code id="image-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                </div>
+                <button class="btn btn-primary" onclick="testImageSimple()">🎨 预览图片</button>
+
+                <div id="image-simple-preview" class="preview-container" style="display: none; margin-top: 1rem;">
+                    <h3>🖼️ 图片预览</h3>
+                    <div class="image-preview">
+                        <img id="image-simple-img" src="" alt="Generated image">
+                    </div>
+                    <a id="image-simple-download" class="download-btn" href="#" download>下载图片</a>
+                </div>
+            </div>
+
+            <!-- REST API Section -->
+            <div class="card">
+                <h2><span class="icon">🔌</span> REST API 方式</h2>
+                <div class="form-group">
+                    <label for="image-prompt">图片描述</label>
+                    <textarea id="image-prompt" placeholder="输入图片描述...">A beautiful sunset over the ocean with palm trees</textarea>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="image-size">图片尺寸</label>
+                        <select id="image-size">
+                            <option value="1024x1024">1024x1024 (方形)</option>
+                            <option value="1792x1024">1792x1024 (横向)</option>
+                            <option value="1024x1792">1024x1792 (竖向)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="image-quality">图片质量</label>
+                        <select id="image-quality">
+                            <option value="standard">标准 (standard)</option>
+                            <option value="hd">高清 (hd)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="testImage()">生成图片</button>
+                <div id="image-result" class="result"></div>
+                <div id="image-preview" class="preview-container" style="display: none;">
+                    <h3>🖼️ 图片预览</h3>
+                    <div class="image-preview">
+                        <img id="image-img" src="" alt="Generated image">
+                    </div>
+                    <a id="image-download" class="download-btn" href="#" download>下载图片</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASR Tab Content -->
+        <div id="tab-asr" class="tab-content">
+            <div class="card">
+                <h2><span class="icon">🎤</span> 语音转文字 (ASR)</h2>
+                <div class="form-group">
+                    <label for="asr-file">上传音频文件</label>
+                    <input type="file" id="asr-file" accept="audio/*">
+                </div>
+                <div class="form-group">
+                    <label for="asr-language">语言 (留空自动检测)</label>
+                    <input type="text" id="asr-language" placeholder="如: zh, en">
+                </div>
+                <button class="btn btn-primary" onclick="testASR()">转写音频</button>
+                <div id="asr-result" class="result"></div>
+                <div id="asr-preview" class="preview-container" style="display: none;">
+                    <h3>📝 转写结果</h3>
+                    <div id="asr-text" class="text-preview"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MCP Tab Content -->
+        <div id="tab-mcp" class="tab-content">
+            <div class="card">
+                <h2><span class="icon">🤖</span> MCP (Streamable HTTP - Stateless)</h2>
+                <p style="color: #94a3b8; margin-bottom: 1rem;">无状态模式，每次请求独立处理，无需初始化</p>
+
+                <div class="form-group">
+                    <label>MCP 端点</label>
+                    <code id="mcp-endpoint" style="color: #667eea;"></code>
+                </div>
+
+                <div class="form-group">
+                    <label for="mcp-request">JSON-RPC 请求</label>
+                    <textarea id="mcp-request" rows="6" style="font-family: monospace;"></textarea>
+                </div>
+
+                <div class="row" style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" onclick="testMCPToolsList()">🔧 列出工具</button>
+                    <button class="btn btn-primary" onclick="testMCPToolsCall()" style="margin-left: 0.5rem;">⚡ 调用工具</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="mcp-tool-name">工具名称</label>
+                    <input type="text" id="mcp-tool-name" value="text_to_speech" placeholder="text_to_speech">
+                </div>
+
+                <div class="form-group">
+                    <label for="mcp-tool-params">工具参数 (JSON)</label>
+                    <textarea id="mcp-tool-params" rows="3" style="font-family: monospace;">{"text": "Hello, World!", "format": "wav"}</textarea>
+                </div>
+
+                <div id="mcp-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- API Info Tab Content -->
+        <div id="tab-api" class="tab-content">
+            <div class="card">
+                <h2><span class="icon">📡</span> API 信息</h2>
+                <div class="form-group">
+                    <label>当前服务器</label>
+                    <code id="api-base" style="color: #667eea;"></code>
+                </div>
+                <div class="form-group">
+                    <label>可用端点</label>
+                    <pre id="api-endpoints"></pre>
+                </div>
+                <div class="form-group">
+                    <label>简易路由示例</label>
+                    <pre id="simple-routes"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = window.location.origin;
+
+        // Initialize API info
+        document.getElementById('api-base').textContent = BASE_URL;
+        document.getElementById('api-endpoints').textContent = JSON.stringify({
+            "TTS (REST)": `POST ${BASE_URL}/api/v1/tts`,
+            "Image (REST)": `POST ${BASE_URL}/api/v1/image`,
+            "ASR (REST)": `POST ${BASE_URL}/api/v1/asr`,
+            "Cache Files": `${BASE_URL}/api/v1/cache/{path}`,
+            "MCP": `${BASE_URL}/ai/mcp`,
+            "Docs": `${BASE_URL}/docs`,
+            "Health": `${BASE_URL}/api/v1/health`
+        }, null, 2);
+        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png`;
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+
+        function showResult(id, html, type) {
+            const el = document.getElementById(id);
+            el.className = `result ${type}`;
+            el.innerHTML = html;
+        }
+
+        function showLoading(id) {
+            showResult(id, '<span class="spinner"></span>处理中...', 'loading');
+        }
+
+        // Convert Windows path to URL path
+        function pathToUrl(winPath) {
+            return winPath.replace(/\\/g, '/');
+        }
+
+        // Update simple URL when input changes
+        function updateTTSSimpleUrl() {
+            const text = document.getElementById('tts-simple-text').value.trim();
+            const format = document.getElementById('tts-simple-format').value;
+            if (text) {
+                const encodedText = encodeURIComponent(text);
+                const url = `${BASE_URL}/tts/${encodedText}.${format}`;
+                document.getElementById('tts-simple-url').textContent = url;
+                document.getElementById('tts-simple-download').href = url;
+                document.getElementById('tts-simple-download').download = `tts_${Date.now()}.${format}`;
+            }
+        }
+
+        // Add event listeners for simple URL inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('tts-simple-text').addEventListener('input', updateTTSSimpleUrl);
+            document.getElementById('tts-simple-format').addEventListener('change', updateTTSSimpleUrl);
+            updateTTSSimpleUrl();
+        });
+
+        async function testTTSSimple() {
+            const text = document.getElementById('tts-simple-text').value;
+            const format = document.getElementById('tts-simple-format').value;
+
+            if (!text.trim()) {
+                alert('请输入文本内容');
+                return;
+            }
+
+            const encodedText = encodeURIComponent(text);
+            const audioUrl = `${BASE_URL}/tts/${encodedText}.${format}`;
+
+            // Set audio source and show preview
+            document.getElementById('tts-simple-audio').src = audioUrl;
+            document.getElementById('tts-simple-preview').style.display = 'block';
+        }
+
+        // Update image simple URL when input changes
+        function updateImageSimpleUrl() {
+            const prompt = document.getElementById('image-simple-prompt').value.trim();
+            if (prompt) {
+                // Backend replaces hyphens with spaces, so use hyphens for spaces
+                const urlPrompt = prompt.replace(/\s+/g, '-');
+                const url = `${BASE_URL}/image/${urlPrompt}.png`;
+                document.getElementById('image-simple-url').textContent = url;
+                document.getElementById('image-simple-download').href = url;
+            }
+        }
+
+        document.getElementById('image-simple-prompt').addEventListener('input', updateImageSimpleUrl);
+        updateImageSimpleUrl();
+
+        async function testImageSimple() {
+            const prompt = document.getElementById('image-simple-prompt').value;
+            if (!prompt.trim()) {
+                alert('请输入图片描述');
+                return;
+            }
+            // Build URL with hyphens converted to spaces on backend
+            const urlPrompt = prompt.trim().replace(/\s+/g, '-');
+            const imageUrl = `${BASE_URL}/image/${urlPrompt}.png`;
+
+            // Show image preview inline
+            document.getElementById('image-simple-img').src = imageUrl;
+            document.getElementById('image-simple-download').href = imageUrl;
+            document.getElementById('image-simple-preview').style.display = 'block';
+        }
+
+        async function testTTS() {
+            const text = document.getElementById('tts-text').value;
+            const format = document.getElementById('tts-format').value;
+            const btn = event.target;
+
+            if (!text.trim()) {
+                showResult('tts-result', '请输入文本内容', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            showLoading('tts-result');
+            document.getElementById('tts-preview').style.display = 'none';
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, format })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || '请求失败');
+                }
+
+                const data = await response.json();
+
+                // Show result
+                showResult('tts-result', `
+                    <strong>✅ 生成成功!</strong>
+                    <div class="result-content">
+                        <p>文件路径: ${data.file_path}</p>
+                        <p>格式: ${data.format.toUpperCase()}</p>
+                        <p>大小: ${(data.size_bytes / 1024).toFixed(2)} KB</p>
+                    </div>
+                `, 'success');
+
+                // Show audio preview (file_path is already full URL)
+                document.getElementById('tts-audio').src = data.file_path;
+                document.getElementById('tts-download').href = data.file_path;
+                document.getElementById('tts-download').download = `tts.${data.format}`;
+                document.getElementById('tts-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('tts-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testImage() {
+            const prompt = document.getElementById('image-prompt').value;
+            const size = document.getElementById('image-size').value;
+            const quality = document.getElementById('image-quality').value;
+            const btn = event.target;
+
+            if (!prompt.trim()) {
+                showResult('image-result', '请输入图片描述', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            showLoading('image-result');
+            document.getElementById('image-preview').style.display = 'none';
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, size, quality })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || '请求失败');
+                }
+
+                const data = await response.json();
+
+                // Show result
+                showResult('image-result', `
+                    <strong>✅ 生成成功!</strong>
+                    <div class="result-content">
+                        <p>文件路径: ${data.file_path}</p>
+                        <p>尺寸: ${data.width}x${data.height}</p>
+                    </div>
+                `, 'success');
+
+                // Show image preview (file_path is already full URL)
+                document.getElementById('image-img').src = data.file_path;
+                document.getElementById('image-download').href = data.file_path;
+                document.getElementById('image-download').download = `image_${Date.now()}.png`;
+                document.getElementById('image-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('image-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testASR() {
+            const fileInput = document.getElementById('asr-file');
+            const language = document.getElementById('asr-language').value;
+            const btn = event.target;
+
+            if (!fileInput.files[0]) {
+                showResult('asr-result', '请选择音频文件', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            showLoading('asr-result');
+            document.getElementById('asr-preview').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            if (language) formData.append('language', language);
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/asr`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || '请求失败');
+                }
+
+                const data = await response.json();
+
+                // Show result
+                showResult('asr-result', `
+                    <strong>✅ 转写成功!</strong>
+                    <div class="result-content">
+                        <p>语言: ${data.language}</p>
+                    </div>
+                `, 'success');
+
+                // Show text preview
+                document.getElementById('asr-text').textContent = data.text;
+                document.getElementById('asr-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('asr-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // MCP Functions
+        document.getElementById('mcp-endpoint').textContent = `${BASE_URL}/ai/mcp`;
+
+        async function callMCP(request) {
+            const response = await fetch(`${BASE_URL}/ai/mcp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json, text/event-stream'
+                },
+                body: request
+            });
+
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('text/event-stream')) {
+                const text = await response.text();
+                const lines = text.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        return JSON.parse(line.substring(6));
+                    }
+                }
+            }
+            return await response.json();
+        }
+
+        async function testMCPToolsList() {
+            const listRequest = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/list",
+                "params": {}
+            };
+
+            document.getElementById('mcp-request').value = JSON.stringify(listRequest, null, 2);
+            showLoading('mcp-result');
+
+            try {
+                const result = await callMCP(JSON.stringify(listRequest));
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+                const tools = result.result?.tools || [];
+                let toolsHtml = '';
+                tools.forEach(tool => {
+                    const params = tool.inputSchema?.properties || {};
+                    const paramsStr = JSON.stringify(params, null, 2).replace(/`/g, '\\`').replace(/\$/g, '\\$');
+                    toolsHtml += `<div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #0f172a; border-radius: 4px; cursor: pointer;" onclick='selectMCPTool("${tool.name}", \`${paramsStr}\`)'>
+                        <strong style="color: #667eea;">${tool.name}</strong>
+                        <p style="color: #94a3b8; margin: 0.25rem 0;">${tool.description || 'No description'}</p>
+                        <code style="font-size: 0.75rem;">点击选择此工具</code>
+                    </div>`;
+                });
+                showResult('mcp-result', `
+                    <strong>✅ 工具列表 (${tools.length} 个)</strong>
+                    <div class="result-content">${toolsHtml}</div>
+                `, 'success');
+            } catch (err) {
+                showResult('mcp-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            }
+        }
+
+        function selectMCPTool(toolName, paramsStr) {
+            document.getElementById('mcp-tool-name').value = toolName;
+            try {
+                const params = JSON.parse(paramsStr);
+                // Generate example params based on schema
+                let exampleParams = {};
+                Object.keys(params).forEach(key => {
+                    const prop = params[key];
+                    if (prop.type === 'string') exampleParams[key] = prop.default || 'example';
+                    else if (prop.type === 'number') exampleParams[key] = prop.default || 0;
+                    else if (prop.type === 'boolean') exampleParams[key] = prop.default || false;
+                    else exampleParams[key] = null;
+                });
+                document.getElementById('mcp-tool-params').value = JSON.stringify(exampleParams, null, 2);
+            } catch (e) {
+                document.getElementById('mcp-tool-params').value = '{}';
+            }
+            showTab('mcp');
+            document.getElementById('mcp-tool-name').focus();
+        }
+
+        async function testMCPToolsCall() {
+            const toolName = document.getElementById('mcp-tool-name').value;
+            let toolParams;
+            try {
+                toolParams = JSON.parse(document.getElementById('mcp-tool-params').value);
+            } catch (e) {
+                showResult('mcp-result', `<strong>❌ JSON 格式错误:</strong> ${e.message}`, 'error');
+                return;
+            }
+
+            const callRequest = {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "tools/call",
+                "params": {
+                    "name": toolName,
+                    "arguments": toolParams
+                }
+            };
+
+            document.getElementById('mcp-request').value = JSON.stringify(callRequest, null, 2);
+            showLoading('mcp-result');
+
+            try {
+                const result = await callMCP(JSON.stringify(callRequest));
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+                showResult('mcp-result', `
+                    <strong>✅ 调用成功!</strong>
+                    <div class="result-content">
+                        <pre style="background: #0f172a; padding: 0.5rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem;">${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `, 'success');
+            } catch (err) {
+                showResult('mcp-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
