@@ -3,7 +3,7 @@
 from fastmcp import FastMCP
 
 from omni_gen.config import get_settings
-from omni_gen.services import ASRService, ImageService, TTSService, TranslateService
+from omni_gen.services import ASRService, ExplainService, ImageService, TTSService, TranslateService
 
 # Create MCP server instance
 mcp = FastMCP("omni-gen AI Tools")
@@ -140,6 +140,30 @@ async def translate_text(
             "translated_full_text": full_text,
             "source_text": text,
             "target_lang": target_lang or get_settings().translate_default_target_lang,
+        }
+    finally:
+        await service.close()
+
+
+# Explain Tools
+@mcp.tool
+async def explain_text(text: str) -> dict:
+    """Explain Chinese text (words, idioms, sayings).
+
+    Args:
+        text: Chinese text to explain
+
+    Returns:
+        Dictionary with explained text and metadata
+    """
+    service = ExplainService()
+    try:
+        explained_text, full_text = await service.explain(text)
+        return {
+            "success": True,
+            "explained_text": explained_text,
+            "explained_full_text": full_text,
+            "source_text": text,
         }
     finally:
         await service.close()

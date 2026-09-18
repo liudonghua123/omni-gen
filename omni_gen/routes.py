@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from omni_gen.config import get_settings
-from omni_gen.services import ASRService, ImageService, TTSService, TranslateService
+from omni_gen.services import ASRService, ExplainService, ImageService, TTSService, TranslateService
 
 router = APIRouter(prefix="/api/v1")
 
@@ -66,6 +66,13 @@ class TranslateResponse(BaseModel):
     translated_full_text: str
     source_text: str
     target_lang: str
+
+
+class ExplainResponse(BaseModel):
+    success: bool
+    explained_text: str
+    explained_full_text: str
+    source_text: str
 
 
 # TTS Routes
@@ -226,6 +233,39 @@ async def translate_text(request: TranslateRequest):
             source_text=request.text,
             target_lang=request.target_lang or settings.translate_default_target_lang,
         )
+    finally:
+        await service.close()
+
+
+# Explain Routes
+@router.post("/explain", response_model=ExplainResponse)
+async def explain_text(request: TranslateRequest):
+    """Explain Chinese text (words, idioms, sayings) using AI."""
+    service = ExplainService()
+    try:
+        explained_text, full_text = await service.explain(request.text)
+        return ExplainResponse(
+            success=True,
+            explained_text=explained_text,
+            explained_full_text=full_text,
+            source_text=request.text,
+        )
+    finally:
+        await service.close()
+
+
+# Simple explain route: /explain/hello (returns plain text)
+@simple_router.get("/explain/{text}")
+async def explain_simple(text: str):
+    """Simple explain route: /explain/text
+
+    Returns plain text explanation.
+    """
+    service = ExplainService()
+    try:
+        explained_text, _ = await service.explain(text)
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse(explained_text)
     finally:
         await service.close()
 

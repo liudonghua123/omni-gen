@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     translate_default_target_lang: str = "en_US"
     translate_prompt: str = "Translate the following text into {target_lang}. Note that you should only output the translated result without any additional explanation:\n\n{source_text}"
 
+    # Explain (Chinese words, idioms, sayings)
+    explain_base_url: str = "https://api.openai.com/v1"
+    explain_api_key: str = ""
+    explain_model: str = "gpt-4o-mini"
+    explain_prompt: str = "请解释以下中文词语、成语或歇后语，包括其中文含义、英文翻译、以及在句子中的用法示例。注意只输出解释内容，不要有其他说明：\n\n{source_text}"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

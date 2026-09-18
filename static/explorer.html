@@ -258,6 +258,9 @@
             <button class="tab" onclick="showTab('translate')">
                 <span class="icon">🌐</span> 翻译
             </button>
+            <button class="tab" onclick="showTab('explain')">
+                <span class="icon">📖</span> 解释
+            </button>
             <button class="tab" onclick="showTab('mcp')">
                 <span class="icon">🤖</span> MCP
             </button>
@@ -465,6 +468,50 @@
             </div>
         </div>
 
+        <!-- Explain Tab Content -->
+        <div id="tab-explain" class="tab-content">
+            <!-- Simple URL Section -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
+                <div class="form-group">
+                    <label for="explain-simple-text">要解释的中文词语/成语/歇后语</label>
+                    <input type="text" id="explain-simple-text" placeholder="输入要解释的内容，如：画蛇添足" value="画蛇添足">
+                </div>
+                <div class="form-group">
+                    <label>生成的 URL</label>
+                    <code id="explain-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                </div>
+                <button class="btn btn-primary" onclick="testExplainSimple()">解释</button>
+                <div id="explain-simple-result" class="result"></div>
+                <div id="explain-simple-preview" class="preview-container" style="display: none;">
+                    <h3>📖 解释结果</h3>
+                    <div id="explain-simple-output" class="text-preview"></div>
+                </div>
+            </div>
+
+            <!-- REST API Section -->
+            <div class="card">
+                <h2><span class="icon">🔌</span> REST API 方式</h2>
+                <div class="form-group">
+                    <label for="explain-text">要解释的中文词语/成语/歇后语</label>
+                    <textarea id="explain-text" rows="3" placeholder="输入要解释的内容">画蛇添足</textarea>
+                </div>
+                <button class="btn btn-primary" onclick="testExplain()">解释</button>
+                <div id="explain-result" class="result"></div>
+                <div id="explain-preview" class="preview-container" style="display: none;">
+                    <h3>📖 解释结果</h3>
+                    <div class="form-group">
+                        <label>原始结果 (含思考过程)</label>
+                        <div id="explain-raw-output" class="text-preview" style="white-space: pre-wrap; background: #1e293b; padding: 0.5rem; border-radius: 4px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>过滤后 (仅解释内容)</label>
+                        <div id="explain-output" class="text-preview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- MCP Tab Content -->
         <div id="tab-mcp" class="tab-content">
             <div class="card">
@@ -534,8 +581,9 @@
             "Docs": `${BASE_URL}/docs`,
             "Health": `${BASE_URL}/api/v1/health`,
             "Translate (REST)": `POST ${BASE_URL}/api/v1/translate`,
+            "Explain (REST)": `POST ${BASE_URL}/api/v1/explain`,
         }, null, 2);
-        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png\n${BASE_URL}/translate/Hello?target_lang=zh_CN`;
+        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png\n${BASE_URL}/translate/Hello?target_lang=zh_CN\n${BASE_URL}/explain/画蛇添足`;
 
         // Tab switching
         function showTab(tabName) {
@@ -816,6 +864,89 @@
 
             } catch (err) {
                 showResult('translate-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testExplainSimple() {
+            const text = document.getElementById('explain-simple-text').value;
+
+            if (!text.trim()) {
+                showResult('explain-simple-result', '请输入要解释的内容', 'error');
+                return;
+            }
+
+            showLoading('explain-simple-result');
+
+            try {
+                const encodedText = encodeURIComponent(text);
+                const response = await fetch(`${BASE_URL}/explain/${encodedText}`);
+                const explainedText = await response.text();
+
+                if (!response.ok) throw new Error(explainedText || '解释失败');
+
+                document.getElementById('explain-simple-output').textContent = explainedText;
+                showResult('explain-simple-result', `
+                    <strong>✅ 解释成功</strong>
+                    <div class="result-content">
+                        <p><strong>源文本:</strong> ${text}</p>
+                    </div>
+                `, 'success');
+                document.getElementById('explain-simple-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('explain-simple-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            }
+        }
+
+        function updateExplainSimpleUrl() {
+            const text = document.getElementById('explain-simple-text').value.trim();
+            if (text) {
+                const encodedText = encodeURIComponent(text);
+                const url = `${BASE_URL}/explain/${encodedText}`;
+                document.getElementById('explain-simple-url').textContent = url;
+            }
+        }
+        document.getElementById('explain-simple-text').addEventListener('input', updateExplainSimpleUrl);
+        updateExplainSimpleUrl();
+
+        async function testExplain() {
+            const text = document.getElementById('explain-text').value;
+            const btn = event.target;
+
+            if (!text.trim()) {
+                showResult('explain-result', '请输入要解释的内容', 'error');
+                return;
+            }
+
+            showLoading('explain-result');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/explain`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text}),
+                });
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || '解释失败');
+
+                // Show raw result with think content
+                document.getElementById('explain-raw-output').textContent = data.explained_full_text;
+                // Show filtered result without think content
+                document.getElementById('explain-output').textContent = data.explained_text;
+                showResult('explain-result', `
+                    <strong>✅ 解释成功</strong>
+                    <div class="result-content">
+                        <p><strong>源文本:</strong> ${data.source_text}</p>
+                    </div>
+                `, 'success');
+                document.getElementById('explain-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('explain-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
             } finally {
                 btn.disabled = false;
             }

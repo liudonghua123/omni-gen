@@ -8,6 +8,7 @@ AI Generation API Server with REST and MCP support.
 - **Image Generation**: Generate images from text prompts
 - **Speech-to-Text (ASR)**: Transcribe audio to text
 - **Translate**: Translate text using AI models
+- **Explain**: Explain Chinese words, idioms, sayings
 
 ## Quick Start
 
@@ -33,6 +34,7 @@ uv run python run.py
 | `/api/v1/image` | POST | Generate image from prompt |
 | `/api/v1/asr` | POST | Transcribe audio to text |
 | `/api/v1/translate` | POST | Translate text |
+| `/api/v1/explain` | POST | Explain Chinese words/idioms |
 | `/api/v1/health` | GET | Health check |
 
 ### Simple Routes
@@ -42,6 +44,7 @@ uv run python run.py
 | `/tts/{text}.{wav\|mp3}` | GET | Simple TTS route |
 | `/image/{prompt}.png` | GET | Simple image route |
 | `/translate/{text}?target_lang=xx_XX` | GET | Simple translate route |
+| `/explain/{text}` | GET | Simple explain route |
 | `/cache/{path}` | GET | Serve cached files |
 
 ### MCP
@@ -93,6 +96,14 @@ TRANSLATE_API_KEY=sk-your-translate-api-key
 TRANSLATE_MODEL=gpt-4o-mini
 TRANSLATE_DEFAULT_TARGET_LANG=en_US
 TRANSLATE_PROMPT=Translate the following text into {target_lang}. Note that you should only output the translated result without any additional explanation:
+
+{source_text}
+
+# Explain (Chinese words, idioms, sayings)
+EXPLAIN_BASE_URL=https://api.openai.com/v1
+EXPLAIN_API_KEY=sk-your-explain-api-key
+EXPLAIN_MODEL=gpt-4o-mini
+EXPLAIN_PROMPT=请解释以下中文词语、成语或歇后语，包括其中文含义、英文翻译、以及在句子中的用法示例。注意只输出解释内容，不要有其他说明：
 
 {source_text}
 ```
