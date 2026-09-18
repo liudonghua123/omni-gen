@@ -120,7 +120,7 @@ async def speech_to_text(
 @mcp.tool
 async def translate_text(
     text: str,
-    target_lang: str | None = None
+    target_lang: str = "en_US"
 ) -> dict:
     """Translate text to target language.
 
@@ -139,7 +139,7 @@ async def translate_text(
             "translated_text": translated_text,
             "translated_full_text": full_text,
             "source_text": text,
-            "target_lang": target_lang or get_settings().translate_default_target_lang,
+            "target_lang": target_lang,
         }
     finally:
         await service.close()

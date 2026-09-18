@@ -57,7 +57,7 @@ class ASRResponse(BaseModel):
 
 class TranslateRequest(BaseModel):
     text: str
-    target_lang: Optional[str] = None
+    target_lang: str = "en_US"
 
 
 class TranslateResponse(BaseModel):

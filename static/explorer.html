@@ -523,24 +523,31 @@
                     <code id="mcp-endpoint" style="color: #667eea;"></code>
                 </div>
 
-                <div class="form-group">
-                    <label for="mcp-request">JSON-RPC 请求</label>
-                    <textarea id="mcp-request" rows="6" style="font-family: monospace;"></textarea>
-                </div>
-
                 <div class="row" style="margin-bottom: 1rem;">
                     <button class="btn btn-primary" onclick="testMCPToolsList()">🔧 列出工具</button>
-                    <button class="btn btn-primary" onclick="testMCPToolsCall()" style="margin-left: 0.5rem;">⚡ 调用工具</button>
                 </div>
+
+                <div id="mcp-tools-list" style="margin-bottom: 1rem;"></div>
 
                 <div class="form-group">
                     <label for="mcp-tool-name">工具名称</label>
-                    <input type="text" id="mcp-tool-name" value="text_to_speech" placeholder="text_to_speech">
+                    <select id="mcp-tool-name">
+                        <option value="">-- 选择工具 --</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label for="mcp-tool-params">工具参数 (JSON)</label>
-                    <textarea id="mcp-tool-params" rows="3" style="font-family: monospace;">{"text": "Hello, World!", "format": "wav"}</textarea>
+                    <textarea id="mcp-tool-params" rows="4" style="font-family: monospace;" oninput="updateMCPCallRequest()">{}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="mcp-request">JSON-RPC 请求 (自动生成)</label>
+                    <textarea id="mcp-request" rows="6" style="font-family: monospace;" readonly></textarea>
+                </div>
+
+                <div class="row" style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" onclick="testMCPToolsCall()">⚡ 调用工具</button>
                 </div>
 
                 <div id="mcp-result" class="result"></div>
@@ -1045,44 +1052,187 @@
                     throw new Error(result.error.message);
                 }
                 const tools = result.result?.tools || [];
-                let toolsHtml = '';
-                tools.forEach(tool => {
+                let toolsHtml = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+                tools.forEach((tool, index) => {
                     const params = tool.inputSchema?.properties || {};
-                    const paramsStr = JSON.stringify(params, null, 2).replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                    toolsHtml += `<div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #0f172a; border-radius: 4px; cursor: pointer;" onclick='selectMCPTool("${tool.name}", \`${paramsStr}\`)'>
-                        <strong style="color: #667eea;">${tool.name}</strong>
-                        <p style="color: #94a3b8; margin: 0.25rem 0;">${tool.description || 'No description'}</p>
-                        <code style="font-size: 0.75rem;">点击选择此工具</code>
-                    </div>`;
+                    const required = tool.inputSchema?.required || [];
+                    const isRequired = required.length > 0 ? `<span style="color: #f59e0b;"> *</span>` : '';
+                    toolsHtml += `
+                        <div style="background: #0f172a; border-radius: 8px; overflow: hidden;">
+                            <div style="padding: 0.75rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleMCPTool(${index})">
+                                <div>
+                                    <strong style="color: #667eea;">${tool.name}${isRequired}</strong>
+                                    <p style="color: #94a3b8; margin: 0.25rem 0; font-size: 0.85rem;">${tool.description || 'No description'}</p>
+                                </div>
+                                <span id="mcp-tool-arrow-${index}" style="color: #94a3b8; transition: transform 0.2s;">▶</span>
+                            </div>
+                            <div id="mcp-tool-details-${index}" style="display: none; padding: 0 0.75rem 0.75rem; border-top: 1px solid #334155;">
+                                <div style="margin-top: 0.75rem;">
+                                    <strong style="color: #a5b4fc;">参数说明</strong>
+                                    <pre id="mcp-tool-schema-${index}" style="background: #1e293b; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; overflow-x: auto; margin: 0.5rem 0;"></pre>
+                                </div>
+                                <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;" onclick="event.stopPropagation(); selectMCPToolByIndex(${index})">使用示例参数</button>
+                            </div>
+                        </div>
+                    `;
                 });
+                toolsHtml += '</div>';
+
                 showResult('mcp-result', `
                     <strong>✅ 工具列表 (${tools.length} 个)</strong>
                     <div class="result-content">${toolsHtml}</div>
                 `, 'success');
+
+                // Store tools data and populate schemas/dropdown
+                window._mcpTools = tools;
+                tools.forEach((tool, index) => {
+                    const schemaEl = document.getElementById(`mcp-tool-schema-${index}`);
+                    if (schemaEl) {
+                        schemaEl.textContent = JSON.stringify(tool.inputSchema, null, 2);
+                    }
+                });
+
+                // Populate tool dropdown
+                const select = document.getElementById('mcp-tool-name');
+                select.innerHTML = '<option value="">-- 选择工具 --</option>';
+                tools.forEach(tool => {
+                    const option = document.createElement('option');
+                    option.value = tool.name;
+                    option.textContent = tool.name;
+                    select.appendChild(option);
+                });
+                select.addEventListener('change', function() {
+                    const tool = window._mcpTools?.find(t => t.name === this.value);
+                    if (tool) {
+                        const index = window._mcpTools.indexOf(tool);
+                        selectMCPToolByIndex(index);
+                    } else {
+                        document.getElementById('mcp-tool-params').value = '{}';
+                        updateMCPCallRequest();
+                    }
+                });
             } catch (err) {
                 showResult('mcp-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
             }
         }
 
-        function selectMCPTool(toolName, paramsStr) {
-            document.getElementById('mcp-tool-name').value = toolName;
-            try {
-                const params = JSON.parse(paramsStr);
-                // Generate example params based on schema
-                let exampleParams = {};
-                Object.keys(params).forEach(key => {
-                    const prop = params[key];
-                    if (prop.type === 'string') exampleParams[key] = prop.default || 'example';
-                    else if (prop.type === 'number') exampleParams[key] = prop.default || 0;
-                    else if (prop.type === 'boolean') exampleParams[key] = prop.default || false;
-                    else exampleParams[key] = null;
-                });
-                document.getElementById('mcp-tool-params').value = JSON.stringify(exampleParams, null, 2);
-            } catch (e) {
-                document.getElementById('mcp-tool-params').value = '{}';
+        function toggleMCPTool(index) {
+            // First collapse all tools
+            const allDetails = document.querySelectorAll('[id^="mcp-tool-details-"]');
+            const allArrows = document.querySelectorAll('[id^="mcp-tool-arrow-"]');
+            allDetails.forEach((el, i) => {
+                if (i !== index) {
+                    el.style.display = 'none';
+                    allArrows[i].style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // Then toggle the clicked tool
+            const details = document.getElementById(`mcp-tool-details-${index}`);
+            const arrow = document.getElementById(`mcp-tool-arrow-${index}`);
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                arrow.style.transform = 'rotate(90deg)';
+            } else {
+                details.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
             }
-            showTab('mcp');
-            document.getElementById('mcp-tool-name').focus();
+        }
+
+        function generateExampleParams(params) {
+            const exampleParams = {};
+            Object.keys(params).forEach(key => {
+                const prop = params[key];
+                if (prop.type === 'string') {
+                    exampleParams[key] = prop.default !== undefined ? prop.default : getDefaultExample(key, prop.description || '');
+                } else if (prop.type === 'number' || prop.type === 'integer') {
+                    exampleParams[key] = prop.default !== undefined ? prop.default : (prop.type === 'integer' ? 1 : 0);
+                } else if (prop.type === 'boolean') {
+                    exampleParams[key] = prop.default !== undefined ? prop.default : false;
+                } else if (prop.type === 'array') {
+                    exampleParams[key] = prop.default !== undefined ? prop.default : [];
+                } else if (prop.type === 'object') {
+                    exampleParams[key] = prop.default !== undefined ? prop.default : {};
+                } else {
+                    exampleParams[key] = prop.default !== undefined ? prop.default : null;
+                }
+            });
+            return exampleParams;
+        }
+
+        function getDefaultExample(key, description) {
+            const keyLower = key.toLowerCase();
+            const descLower = description.toLowerCase();
+
+            if (keyLower === 'target_lang') return 'en_US';
+            if (keyLower.includes('text') || keyLower.includes('content')) return 'Hello, World!';
+            if (keyLower.includes('lang') && !keyLower.includes('target')) return 'en_US';
+            if (keyLower.includes('format')) return 'wav';
+            if (keyLower.includes('size')) return '1024x1024';
+            if (keyLower.includes('quality')) return 'standard';
+            if (keyLower.includes('filename')) return 'audio.wav';
+            if (keyLower.includes('base64')) return 'SGVsbG8gV29ybGQh';
+            if (keyLower.includes('prompt')) return 'a beautiful sunset';
+
+            if (descLower.includes('语言') || descLower.includes('language')) return 'en_US';
+            if (descLower.includes('格式') || descLower.includes('format')) return 'wav';
+            if (descLower.includes('大小') || descLower.includes('size')) return '1024x1024';
+            if (descLower.includes('质量') || descLower.includes('quality')) return 'standard';
+
+            return 'example';
+        }
+
+        function selectMCPToolByIndex(index) {
+            const tool = window._mcpTools?.[index];
+            if (!tool) return;
+
+            const params = tool.inputSchema?.properties || {};
+            const exampleParams = generateExampleParams(params);
+            const exampleParamsStr = JSON.stringify(exampleParams, null, 2);
+
+            // Update dropdown
+            const select = document.getElementById('mcp-tool-name');
+            select.value = tool.name;
+
+            // Update params
+            document.getElementById('mcp-tool-params').value = exampleParamsStr;
+
+            // Update JSON-RPC request
+            updateMCPCallRequest();
+        }
+
+        function updateMCPCallRequest() {
+            const toolName = document.getElementById('mcp-tool-name').value;
+            let toolParams = {};
+            try {
+                toolParams = JSON.parse(document.getElementById('mcp-tool-params').value || '{}');
+            } catch (e) {
+                // Invalid JSON, ignore
+            }
+
+            const callRequest = {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "tools/call",
+                "params": {
+                    "name": toolName,
+                    "arguments": toolParams
+                }
+            };
+            document.getElementById('mcp-request').value = JSON.stringify(callRequest, null, 2);
+        }
+
+        function selectMCPTool(toolName, exampleParamsStr) {
+            // Find tool by name and use index
+            const tool = window._mcpTools?.find(t => t.name === toolName);
+            if (tool) {
+                const index = window._mcpTools.indexOf(tool);
+                selectMCPToolByIndex(index);
+            } else {
+                document.getElementById('mcp-tool-name').value = toolName;
+                document.getElementById('mcp-tool-params').value = exampleParamsStr;
+                updateMCPCallRequest();
+            }
         }
 
         async function testMCPToolsCall() {
