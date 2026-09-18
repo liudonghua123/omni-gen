@@ -1,11 +1,14 @@
 """Translation service."""
 
+import hashlib
+
+from omni_gen.cache import CacheManager
 from omni_gen.config import get_settings
 from omni_gen.models.base import BaseClient
 
 
 class TranslateService:
-    """Translation service using AI models."""
+    """Translation service using AI models with caching support."""
 
     def __init__(self):
         """Initialize translate service."""
@@ -27,6 +30,7 @@ class TranslateService:
         )
         self.default_target_lang = settings.translate_default_target_lang
         self.prompt_template = settings.translate_prompt
+        self.cache = CacheManager("translate")
 
     async def translate(
         self, source_text: str, target_lang: str | None = None
@@ -41,6 +45,19 @@ class TranslateService:
             Tuple of (translated_text, full_text_with_think_content)
         """
         target_lang = target_lang or self.default_target_lang
+
+        # Check cache
+        content_hash = hashlib.md5(
+            f"translate:{source_text}:{target_lang}:{self.model}".encode()
+        ).hexdigest()
+
+        cached = self.cache.load(content_hash, "txt")
+        if cached:
+            full_text = cached.decode("utf-8")
+            translated_text = self._filter_think_content(full_text)
+            return translated_text.strip(), full_text.strip()
+
+        # Call API
         prompt = self.prompt_template.format(
             target_lang=target_lang,
             source_text=source_text,
@@ -59,6 +76,10 @@ class TranslateService:
         data = response.json()
 
         full_text = data["choices"][0]["message"]["content"]
+
+        # Save to cache
+        self.cache.save(content_hash, "txt", full_text.encode("utf-8"))
+
         translated_text = self._filter_think_content(full_text)
         return translated_text.strip(), full_text.strip()
 
