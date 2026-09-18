@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from omni_gen.config import get_settings
-from omni_gen.services import ASRService, ImageService, TTSService
+from omni_gen.services import ASRService, ImageService, TTSService, TranslateService
 
 router = APIRouter(prefix="/api/v1")
 
@@ -53,6 +53,19 @@ class ASRResponse(BaseModel):
     success: bool
     text: str
     language: str
+
+
+class TranslateRequest(BaseModel):
+    text: str
+    target_lang: Optional[str] = None
+
+
+class TranslateResponse(BaseModel):
+    success: bool
+    translated_text: str
+    translated_full_text: str
+    source_text: str
+    target_lang: str
 
 
 # TTS Routes
@@ -103,6 +116,22 @@ async def synthesize_simple(text_and_format: str):
             path=str(path),
             media_type=media_type,
         )
+    finally:
+        await service.close()
+
+
+# Simple translate route: /translate/hello?target_lang=zh_CN (returns plain text)
+@simple_router.get("/translate/{text}")
+async def translate_simple(text: str, target_lang: str | None = None):
+    """Simple translate route: /translate/text?target_lang=xx_XX
+
+    Returns plain text translation.
+    """
+    service = TranslateService()
+    try:
+        translated_text, _ = await service.translate(text, target_lang)
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse(translated_text)
     finally:
         await service.close()
 
@@ -180,6 +209,25 @@ async def transcribe_audio(
 async def health_check():
     """Health check endpoint."""
     return {"status": "ok", "service": "omni-gen"}
+
+
+# Translate Routes
+@router.post("/translate", response_model=TranslateResponse)
+async def translate_text(request: TranslateRequest):
+    """Translate text using AI (REST API)."""
+    service = TranslateService()
+    try:
+        translated_text, full_text = await service.translate(request.text, request.target_lang)
+        settings = get_settings()
+        return TranslateResponse(
+            success=True,
+            translated_text=translated_text,
+            translated_full_text=full_text,
+            source_text=request.text,
+            target_lang=request.target_lang or settings.translate_default_target_lang,
+        )
+    finally:
+        await service.close()
 
 
 # Cache file serving routes (no /api/v1 prefix for cleaner URLs)

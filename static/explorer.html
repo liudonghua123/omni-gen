@@ -255,6 +255,9 @@
             <button class="tab" onclick="showTab('asr')">
                 <span class="icon">🎤</span> ASR
             </button>
+            <button class="tab" onclick="showTab('translate')">
+                <span class="icon">🌐</span> 翻译
+            </button>
             <button class="tab" onclick="showTab('mcp')">
                 <span class="icon">🤖</span> MCP
             </button>
@@ -406,6 +409,62 @@
             </div>
         </div>
 
+        <!-- Translate Tab Content -->
+        <div id="tab-translate" class="tab-content">
+            <!-- Simple URL Section -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
+                <div class="form-group">
+                    <label for="translate-simple-text">要翻译的文本</label>
+                    <input type="text" id="translate-simple-text" placeholder="输入要翻译的文本" value="Hello, World!">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="translate-simple-target-lang">目标语言</label>
+                        <input type="text" id="translate-simple-target-lang" placeholder="如: zh_CN, en_US" value="zh_CN">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>生成的 URL</label>
+                    <code id="translate-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                </div>
+                <button class="btn btn-primary" onclick="testTranslateSimple()">翻译</button>
+                <div id="translate-simple-result" class="result"></div>
+                <div id="translate-simple-preview" class="preview-container" style="display: none;">
+                    <h3>🌐 翻译结果</h3>
+                    <div id="translate-simple-output" class="text-preview"></div>
+                </div>
+            </div>
+
+            <!-- REST API Section -->
+            <div class="card">
+                <h2><span class="icon">🔌</span> REST API 方式</h2>
+                <div class="form-group">
+                    <label for="translate-text">要翻译的文本</label>
+                    <textarea id="translate-text" rows="3" placeholder="输入要翻译的文本">Hello, World!</textarea>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="translate-target-lang">目标语言</label>
+                        <input type="text" id="translate-target-lang" placeholder="如: zh_CN, en_US" value="zh_CN">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="testTranslate()">翻译</button>
+                <div id="translate-result" class="result"></div>
+                <div id="translate-preview" class="preview-container" style="display: none;">
+                    <h3>🌐 翻译结果</h3>
+                    <div class="form-group">
+                        <label>原始结果 (含思考过程)</label>
+                        <div id="translate-raw-output" class="text-preview" style="white-space: pre-wrap; background: #1e293b; padding: 0.5rem; border-radius: 4px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>过滤后 (仅翻译内容)</label>
+                        <div id="translate-output" class="text-preview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- MCP Tab Content -->
         <div id="tab-mcp" class="tab-content">
             <div class="card">
@@ -473,9 +532,10 @@
             "Cache Files": `${BASE_URL}/api/v1/cache/{path}`,
             "MCP": `${BASE_URL}/ai/mcp`,
             "Docs": `${BASE_URL}/docs`,
-            "Health": `${BASE_URL}/api/v1/health`
+            "Health": `${BASE_URL}/api/v1/health`,
+            "Translate (REST)": `POST ${BASE_URL}/api/v1/translate`,
         }, null, 2);
-        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png`;
+        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png\n${BASE_URL}/translate/Hello?target_lang=zh_CN`;
 
         // Tab switching
         function showTab(tabName) {
@@ -551,6 +611,21 @@
 
         document.getElementById('image-simple-prompt').addEventListener('input', updateImageSimpleUrl);
         updateImageSimpleUrl();
+
+        // Translate Simple URL update
+        function updateTranslateSimpleUrl() {
+            const text = document.getElementById('translate-simple-text').value.trim();
+            const targetLang = document.getElementById('translate-simple-target-lang').value.trim() || 'en_US';
+            if (text) {
+                const encodedText = encodeURIComponent(text);
+                const encodedTargetLang = encodeURIComponent(targetLang);
+                const url = `${BASE_URL}/translate/${encodedText}?target_lang=${encodedTargetLang}`;
+                document.getElementById('translate-simple-url').textContent = url;
+            }
+        }
+        document.getElementById('translate-simple-text').addEventListener('input', updateTranslateSimpleUrl);
+        document.getElementById('translate-simple-target-lang').addEventListener('input', updateTranslateSimpleUrl);
+        updateTranslateSimpleUrl();
 
         async function testImageSimple() {
             const prompt = document.getElementById('image-simple-prompt').value;
@@ -665,6 +740,82 @@
 
             } catch (err) {
                 showResult('image-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function testTranslateSimple() {
+            const text = document.getElementById('translate-simple-text').value;
+            const targetLang = document.getElementById('translate-simple-target-lang').value || 'en_US';
+
+            if (!text.trim()) {
+                showResult('translate-simple-result', '请输入要翻译的文本', 'error');
+                return;
+            }
+
+            showLoading('translate-simple-result');
+
+            try {
+                const encodedText = encodeURIComponent(text);
+                const response = await fetch(`${BASE_URL}/translate/${encodedText}?target_lang=${encodeURIComponent(targetLang)}`);
+                const translatedText = await response.text();
+
+                if (!response.ok) throw new Error(translatedText || '翻译失败');
+
+                document.getElementById('translate-simple-output').textContent = translatedText;
+                showResult('translate-simple-result', `
+                    <strong>✅ 翻译成功</strong>
+                    <div class="result-content">
+                        <p><strong>源文本:</strong> ${text}</p>
+                        <p><strong>目标语言:</strong> ${targetLang}</p>
+                    </div>
+                `, 'success');
+                document.getElementById('translate-simple-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('translate-simple-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            }
+        }
+
+        async function testTranslate() {
+            const text = document.getElementById('translate-text').value;
+            const targetLang = document.getElementById('translate-target-lang').value || 'en_US';
+            const btn = event.target;
+
+            if (!text.trim()) {
+                showResult('translate-result', '请输入要翻译的文本', 'error');
+                return;
+            }
+
+            showLoading('translate-result');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/translate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text, target_lang: targetLang}),
+                });
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || '翻译失败');
+
+                // Show raw result with think content
+                document.getElementById('translate-raw-output').textContent = data.translated_full_text;
+                // Show filtered result without think content
+                document.getElementById('translate-output').textContent = data.translated_text;
+                showResult('translate-result', `
+                    <strong>✅ 翻译成功</strong>
+                    <div class="result-content">
+                        <p><strong>源文本:</strong> ${data.source_text}</p>
+                        <p><strong>目标语言:</strong> ${data.target_lang}</p>
+                    </div>
+                `, 'success');
+                document.getElementById('translate-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('translate-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
             } finally {
                 btn.disabled = false;
             }

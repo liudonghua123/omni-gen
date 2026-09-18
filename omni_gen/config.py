@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     # Paths
     cache_dir: Path = Path("./cache")
 
+    # OpenAI (Generic AI)
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+
     # TTS
     tts_base_url: str = "https://new-api.app.ynu.edu.cn/v1"
     tts_api_key: str = ""
@@ -33,6 +38,13 @@ class Settings(BaseSettings):
     asr_base_url: str = "https://new-api.app.ynu.edu.cn/v1"
     asr_api_key: str = ""
     asr_model: str = "whisper-1"
+
+    # Translate
+    translate_base_url: str = "https://api.openai.com/v1"
+    translate_api_key: str = ""
+    translate_model: str = "gpt-4o-mini"
+    translate_default_target_lang: str = "en_US"
+    translate_prompt: str = "Translate the following text into {target_lang}. Note that you should only output the translated result without any additional explanation:\n\n{source_text}"
 
     class Config:
         env_file = ".env"

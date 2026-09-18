@@ -3,7 +3,7 @@
 from fastmcp import FastMCP
 
 from omni_gen.config import get_settings
-from omni_gen.services import ASRService, ImageService, TTSService
+from omni_gen.services import ASRService, ImageService, TTSService, TranslateService
 
 # Create MCP server instance
 mcp = FastMCP("omni-gen AI Tools")
@@ -111,6 +111,35 @@ async def speech_to_text(
             "text": text,
             "file_path": f"{base_url}/cache/{relative_path}",
             "language_detected": language or "auto",
+        }
+    finally:
+        await service.close()
+
+
+# Translate Tools
+@mcp.tool
+async def translate_text(
+    text: str,
+    target_lang: str | None = None
+) -> dict:
+    """Translate text to target language.
+
+    Args:
+        text: Text to translate
+        target_lang: Target language code (e.g., "en_US", "zh_CN")
+
+    Returns:
+        Dictionary with translated text and metadata
+    """
+    service = TranslateService()
+    try:
+        translated_text, full_text = await service.translate(text, target_lang)
+        return {
+            "success": True,
+            "translated_text": translated_text,
+            "translated_full_text": full_text,
+            "source_text": text,
+            "target_lang": target_lang or get_settings().translate_default_target_lang,
         }
     finally:
         await service.close()
