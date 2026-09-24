@@ -126,7 +126,7 @@ async def speech_to_text(
 # Translate Tools
 @mcp.tool
 async def translate_text(
-    text: str,
+    content: str,
     target_lang: str = "en_US",
     prompt: str | None = None,
     refresh: bool = False,
@@ -134,7 +134,7 @@ async def translate_text(
     """Translate text to target language.
 
     Args:
-        text: Text to translate
+        content: Text to translate
         target_lang: Target language code (e.g., "en_US", "zh_CN")
         prompt: Custom prompt template (optional)
         refresh: If True, bypass cache and regenerate (default: False)
@@ -144,12 +144,12 @@ async def translate_text(
     """
     service = TranslateService()
     try:
-        translated_text, full_text = await service.translate(text, target_lang, prompt, refresh)
+        translated_text, full_text = await service.translate(content, target_lang, prompt, refresh)
         return {
             "success": True,
             "translated_text": translated_text,
             "translated_full_text": full_text,
-            "source_text": text,
+            "content": content,
             "target_lang": target_lang,
             "cached": not refresh,
         }
@@ -160,14 +160,14 @@ async def translate_text(
 # Explain Tools
 @mcp.tool
 async def explain_text(
-    text: str,
+    content: str,
     prompt: str | None = None,
     refresh: bool = False,
 ) -> dict:
     """Explain Chinese text (words, idioms, sayings).
 
     Args:
-        text: Chinese text to explain
+        content: Chinese text to explain
         prompt: Custom prompt template (optional)
         refresh: If True, bypass cache and regenerate (default: False)
 
@@ -176,12 +176,12 @@ async def explain_text(
     """
     service = ExplainService()
     try:
-        explained_text, full_text = await service.explain(text, prompt, refresh)
+        explained_text, full_text = await service.explain(content, prompt, refresh)
         return {
             "success": True,
             "explained_text": explained_text,
             "explained_full_text": full_text,
-            "source_text": text,
+            "content": content,
             "cached": not refresh,
         }
     finally:

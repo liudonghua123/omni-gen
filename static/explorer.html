@@ -594,8 +594,8 @@
             <div class="card" style="margin-bottom: 1rem;">
                 <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
                 <div class="form-group">
-                    <label for="translate-simple-text">要翻译的文本</label>
-                    <input type="text" id="translate-simple-text" placeholder="输入要翻译的文本" value="Hello, World!">
+                    <label for="translate-simple-content">要翻译的文本</label>
+                    <input type="text" id="translate-simple-content" placeholder="输入要翻译的文本" value="Hello, World!">
                 </div>
                 <div class="row">
                     <div class="form-group">
@@ -604,8 +604,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="translate-simple-prompt">自定义 Prompt（可选，支持 {source_text}、{target_lang}）</label>
-                    <textarea id="translate-simple-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请将以下文本翻译成{target_lang}：&#10;{source_text}"></textarea>
+                    <label for="translate-simple-prompt">自定义 Prompt（可选，支持 {content}、{target_lang}）</label>
+                    <textarea id="translate-simple-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请将以下文本翻译成{target_lang}：&#10;{content}"></textarea>
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
                     <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="translate-simple-refresh"> 跳过缓存，重新生成</label>
@@ -626,8 +626,8 @@
             <div class="card">
                 <h2><span class="icon">🔌</span> REST API 方式</h2>
                 <div class="form-group">
-                    <label for="translate-text">要翻译的文本</label>
-                    <textarea id="translate-text" rows="3" placeholder="输入要翻译的文本">Hello, World!</textarea>
+                    <label for="translate-content">要翻译的文本</label>
+                    <textarea id="translate-content" rows="3" placeholder="输入要翻译的文本">Hello, World!</textarea>
                 </div>
                 <div class="row">
                     <div class="form-group">
@@ -636,8 +636,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="translate-prompt">自定义 Prompt（可选，支持 {source_text}、{target_lang}）</label>
-                    <textarea id="translate-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请将以下文本翻译成{target_lang}：&#10;{source_text}"></textarea>
+                    <label for="translate-prompt">自定义 Prompt（可选，支持 {content}、{target_lang}）</label>
+                    <textarea id="translate-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请将以下文本翻译成{target_lang}：&#10;{content}"></textarea>
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
                     <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="translate-refresh"> 跳过缓存，重新生成</label>
@@ -664,12 +664,12 @@
             <div class="card" style="margin-bottom: 1rem;">
                 <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
                 <div class="form-group">
-                    <label for="explain-simple-text">要解释的中文词语/成语/歇后语</label>
-                    <input type="text" id="explain-simple-text" placeholder="输入要解释的内容，如：画蛇添足" value="画蛇添足">
+                    <label for="explain-simple-content">要解释的中文词语/成语/歇后语</label>
+                    <input type="text" id="explain-simple-content" placeholder="输入要解释的内容，如：画蛇添足" value="画蛇添足">
                 </div>
                 <div class="form-group">
-                    <label for="explain-simple-prompt">自定义 Prompt（可选，支持 {source_text}）</label>
-                    <textarea id="explain-simple-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请详细解释以下中文词汇：&#10;{source_text}"></textarea>
+                    <label for="explain-simple-prompt">自定义 Prompt（可选，支持 {content}）</label>
+                    <textarea id="explain-simple-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请详细解释以下中文词汇：&#10;{content}"></textarea>
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
                     <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="explain-simple-refresh"> 跳过缓存，重新生成</label>
@@ -690,12 +690,12 @@
             <div class="card">
                 <h2><span class="icon">🔌</span> REST API 方式</h2>
                 <div class="form-group">
-                    <label for="explain-text">要解释的中文词语/成语/歇后语</label>
-                    <textarea id="explain-text" rows="3" placeholder="输入要解释的内容">画蛇添足</textarea>
+                    <label for="explain-content">要解释的中文词语/成语/歇后语</label>
+                    <textarea id="explain-content" rows="3" placeholder="输入要解释的内容">画蛇添足</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="explain-prompt">自定义 Prompt（可选，支持 {source_text}）</label>
-                    <textarea id="explain-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请详细解释以下中文词汇：&#10;{source_text}"></textarea>
+                    <label for="explain-prompt">自定义 Prompt（可选，支持 {content}）</label>
+                    <textarea id="explain-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请详细解释以下中文词汇：&#10;{content}"></textarea>
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
                     <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="explain-refresh"> 跳过缓存，重新生成</label>
@@ -972,7 +972,7 @@
 
         // Translate Simple URL update
         function updateTranslateSimpleUrl() {
-            const text = document.getElementById('translate-simple-text').value.trim();
+            const text = document.getElementById('translate-simple-content').value.trim();
             const targetLang = document.getElementById('translate-simple-target-lang').value.trim() || 'en_US';
             const prompt = document.getElementById('translate-simple-prompt').value.trim();
             const refresh = document.getElementById('translate-simple-refresh').checked;
@@ -985,7 +985,7 @@
                 document.getElementById('translate-simple-url').textContent = url;
             }
         }
-        document.getElementById('translate-simple-text').addEventListener('input', updateTranslateSimpleUrl);
+        document.getElementById('translate-simple-content').addEventListener('input', updateTranslateSimpleUrl);
         document.getElementById('translate-simple-target-lang').addEventListener('input', updateTranslateSimpleUrl);
         document.getElementById('translate-simple-prompt').addEventListener('input', updateTranslateSimpleUrl);
         document.getElementById('translate-simple-refresh').addEventListener('change', updateTranslateSimpleUrl);
@@ -1110,7 +1110,7 @@
         }
 
         async function testTranslateSimple() {
-            const text = document.getElementById('translate-simple-text').value;
+            const text = document.getElementById('translate-simple-content').value;
             const targetLang = document.getElementById('translate-simple-target-lang').value || 'en_US';
             const prompt = document.getElementById('translate-simple-prompt').value.trim() || null;
             const refresh = document.getElementById('translate-simple-refresh').checked;
@@ -1138,7 +1138,7 @@
                 showResult('translate-simple-result', `
                     <strong>✅ 翻译成功</strong>
                     <div class="result-content">
-                        <p><strong>源文本:</strong> ${text}</p>
+                        <p><strong>源文本:</strong> ${content}</p>
                         <p><strong>目标语言:</strong> ${targetLang}</p>
                         <p><strong>缓存:</strong> ${refresh ? '已跳过' : '已使用'}</p>
                     </div>
@@ -1151,13 +1151,13 @@
         }
 
         async function testTranslate() {
-            const text = document.getElementById('translate-text').value;
+            const content = document.getElementById('translate-content').value;
             const targetLang = document.getElementById('translate-target-lang').value || 'en_US';
             const prompt = document.getElementById('translate-prompt').value.trim() || null;
             const refresh = document.getElementById('translate-refresh').checked;
             const btn = event.target;
 
-            if (!text.trim()) {
+            if (!content.trim()) {
                 showResult('translate-result', '请输入要翻译的文本', 'error');
                 return;
             }
@@ -1166,7 +1166,7 @@
             btn.disabled = true;
 
             try {
-                const body = {text, target_lang: targetLang};
+                const body = {content, target_lang: targetLang};
                 if (prompt) body.prompt = prompt;
                 if (refresh) body.refresh = true;
 
@@ -1186,7 +1186,7 @@
                 showResult('translate-result', `
                     <strong>✅ 翻译成功</strong>
                     <div class="result-content">
-                        <p><strong>源文本:</strong> ${data.source_text}</p>
+                        <p><strong>源文本:</strong> ${data.content}</p>
                         <p><strong>目标语言:</strong> ${data.target_lang}</p>
                         <p><strong>缓存:</strong> ${data.cached ? '命中缓存' : '已重新生成'}</p>
                     </div>
@@ -1201,7 +1201,7 @@
         }
 
         async function testExplainSimple() {
-            const text = document.getElementById('explain-simple-text').value;
+            const text = document.getElementById('explain-simple-content').value;
             const prompt = document.getElementById('explain-simple-prompt').value.trim() || null;
             const refresh = document.getElementById('explain-simple-refresh').checked;
 
@@ -1227,7 +1227,7 @@
                 showResult('explain-simple-result', `
                     <strong>✅ 解释成功</strong>
                     <div class="result-content">
-                        <p><strong>源文本:</strong> ${text}</p>
+                        <p><strong>源文本:</strong> ${content}</p>
                         <p><strong>缓存:</strong> ${refresh ? '已跳过' : '已使用'}</p>
                     </div>
                 `, 'success');
@@ -1239,7 +1239,7 @@
         }
 
         function updateExplainSimpleUrl() {
-            const text = document.getElementById('explain-simple-text').value.trim();
+            const text = document.getElementById('explain-simple-content').value.trim();
             const prompt = document.getElementById('explain-simple-prompt').value.trim();
             const refresh = document.getElementById('explain-simple-refresh').checked;
             if (text) {
@@ -1252,18 +1252,18 @@
                 document.getElementById('explain-simple-url').textContent = url;
             }
         }
-        document.getElementById('explain-simple-text').addEventListener('input', updateExplainSimpleUrl);
+        document.getElementById('explain-simple-content').addEventListener('input', updateExplainSimpleUrl);
         document.getElementById('explain-simple-prompt').addEventListener('input', updateExplainSimpleUrl);
         document.getElementById('explain-simple-refresh').addEventListener('change', updateExplainSimpleUrl);
         updateExplainSimpleUrl();
 
         async function testExplain() {
-            const text = document.getElementById('explain-text').value;
+            const content = document.getElementById('explain-content').value;
             const prompt = document.getElementById('explain-prompt').value.trim() || null;
             const refresh = document.getElementById('explain-refresh').checked;
             const btn = event.target;
 
-            if (!text.trim()) {
+            if (!content.trim()) {
                 showResult('explain-result', '请输入要解释的内容', 'error');
                 return;
             }
@@ -1272,7 +1272,7 @@
             btn.disabled = true;
 
             try {
-                const body = {text};
+                const body = {content};
                 if (prompt) body.prompt = prompt;
                 if (refresh) body.refresh = true;
 
@@ -1292,7 +1292,7 @@
                 showResult('explain-result', `
                     <strong>✅ 解释成功</strong>
                     <div class="result-content">
-                        <p><strong>源文本:</strong> ${data.source_text}</p>
+                        <p><strong>源文本:</strong> ${data.content}</p>
                         <p><strong>缓存:</strong> ${data.cached ? '命中缓存' : '已重新生成'}</p>
                     </div>
                 `, 'success');

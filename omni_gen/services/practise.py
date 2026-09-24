@@ -110,12 +110,12 @@ class PractiseService:
         logger.info("[Practise] Cache MISS, calling API...")
 
         # Call API
-        prompt_text = prompt_template.format(
-            topic=topic,
-            count=count,
-            types="、".join([self._type_to_chinese(t) for t in types]),
-            types_en=",".join(types),
-        )
+        # Replace all common placeholders so custom prompts work regardless of variable name
+        prompt_text = (prompt_template
+            .replace("{topic}", topic)
+            .replace("{count}", str(count))
+            .replace("{types}", "、".join([self._type_to_chinese(t) for t in types]))
+            .replace("{types_en}", ",".join(types)))
 
         try:
             logger.info(f"[Practise] Sending request to {self.base_url}/chat/completions")
@@ -124,8 +124,6 @@ class PractiseService:
                 json={
                     "model": self.model,
                     "messages": [{"role": "user", "content": prompt_text}],
-                    "max_tokens": 4000,
-                    "temperature": 0.7,
                 },
             )
 

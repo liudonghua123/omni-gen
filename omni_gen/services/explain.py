@@ -37,7 +37,7 @@ class ExplainService:
             api_key=self.api_key,
             model=self.model,
         )
-        self.prompt_template = config.get("EXPLAIN_PROMPT", "请详细解释以下中文词汇，包括词义、用法、例句等：\n{source_text}")
+        self.prompt_template = config.get("EXPLAIN_PROMPT", "请详细解释以下中文词汇，包括词义、用法、例句等：\n{content}")
         self.cache = CacheManager("explain")
 
     async def explain(self, text: str, prompt: str | None = None, refresh: bool = False) -> tuple[str, str]:
@@ -45,7 +45,7 @@ class ExplainService:
 
         Args:
             text: Chinese text to explain
-            prompt: Custom prompt template (supports {source_text})
+            prompt: Custom prompt template (supports {content})
                    If None, uses default from config
             refresh: If True, bypass cache and regenerate (default: False)
 
@@ -68,15 +68,13 @@ class ExplainService:
                 return filtered_text.strip(), full_text.strip()
 
         # Call API
-        prompt_text = prompt_template.format(source_text=text)
+        prompt_text = prompt_template.replace("{content}", text)
 
         response = await self.client.post(
             "/chat/completions",
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": prompt_text}],
-                "max_tokens": 2000,
-                "temperature": 0.3,
             },
         )
         response.raise_for_status()

@@ -66,7 +66,7 @@ class ASRResponse(BaseModel):
 
 
 class TranslateRequest(BaseModel):
-    text: str
+    content: str
     target_lang: str = "en_US"
     prompt: Optional[str] = None
     refresh: bool = False
@@ -76,13 +76,13 @@ class TranslateResponse(BaseModel):
     success: bool
     translated_text: str
     translated_full_text: str
-    source_text: str
+    content: str
     target_lang: str
     cached: bool = False
 
 
 class ExplainRequest(BaseModel):
-    text: str
+    content: str
     prompt: Optional[str] = None
     refresh: bool = False
 
@@ -91,7 +91,7 @@ class ExplainResponse(BaseModel):
     success: bool
     explained_text: str
     explained_full_text: str
-    source_text: str
+    content: str
     cached: bool = False
 
 
@@ -246,14 +246,14 @@ async def translate_text(request: TranslateRequest):
     service = TranslateService()
     try:
         translated_text, full_text = await service.translate(
-            request.text, request.target_lang, request.prompt, request.refresh
+            request.content, request.target_lang, request.prompt, request.refresh
         )
         settings = get_settings()
         return {
             "success": True,
             "translated_text": translated_text,
             "translated_full_text": full_text,
-            "source_text": request.text,
+            "content": request.content,
             "target_lang": request.target_lang or settings.translate_default_target_lang,
             "cached": not request.refresh,
         }
@@ -262,20 +262,20 @@ async def translate_text(request: TranslateRequest):
 
 
 # Simple translate route: /translate/hello?target_lang=zh_CN (returns plain text)
-@simple_router.get("/translate/{text}")
+@simple_router.get("/translate/{content}")
 async def translate_simple(
-    text: str,
+    content: str,
     target_lang: str | None = None,
     prompt: str | None = None,
     refresh: bool = False,
 ):
-    """Simple translate route: /translate/text?target_lang=xx_XX&prompt=...&refresh=false
+    """Simple translate route: /translate/content?target_lang=xx_XX&prompt=...&refresh=false
 
     Returns plain text translation.
     """
     service = TranslateService()
     try:
-        translated_text, _ = await service.translate(text, target_lang, prompt, refresh)
+        translated_text, _ = await service.translate(content, target_lang, prompt, refresh)
         from fastapi.responses import PlainTextResponse
         return PlainTextResponse(translated_text)
     finally:
@@ -289,13 +289,13 @@ async def explain_text(request: ExplainRequest):
     service = ExplainService()
     try:
         explained_text, full_text = await service.explain(
-            request.text, request.prompt, request.refresh
+            request.content, request.prompt, request.refresh
         )
         return {
             "success": True,
             "explained_text": explained_text,
             "explained_full_text": full_text,
-            "source_text": request.text,
+            "content": request.content,
             "cached": not request.refresh,
         }
     finally:
@@ -303,19 +303,19 @@ async def explain_text(request: ExplainRequest):
 
 
 # Simple explain route: /explain/hello (returns plain text)
-@simple_router.get("/explain/{text}")
+@simple_router.get("/explain/{content}")
 async def explain_simple(
-    text: str,
+    content: str,
     prompt: str | None = None,
     refresh: bool = False,
 ):
-    """Simple explain route: /explain/text?prompt=...&refresh=false
+    """Simple explain route: /explain/content?prompt=...&refresh=false
 
     Returns plain text explanation.
     """
     service = ExplainService()
     try:
-        explained_text, _ = await service.explain(text, prompt, refresh)
+        explained_text, _ = await service.explain(content, prompt, refresh)
         from fastapi.responses import PlainTextResponse
         return PlainTextResponse(explained_text)
     finally:

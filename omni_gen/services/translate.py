@@ -38,7 +38,7 @@ class TranslateService:
             model=self.model,
         )
         self.default_target_lang = config.get("TRANSLATE_DEFAULT_TARGET_LANG", "en_US")
-        self.prompt_template = config.get("TRANSLATE_PROMPT", "请将以下文本翻译成{target_lang}：\n{source_text}")
+        self.prompt_template = config.get("TRANSLATE_PROMPT", "请将以下文本翻译成{target_lang}：\n{content}")
         self.cache = CacheManager("translate")
 
     async def translate(
@@ -53,7 +53,7 @@ class TranslateService:
         Args:
             source_text: Text to translate
             target_lang: Target language code (e.g., "en_US", "zh_CN")
-            prompt: Custom prompt template (supports {source_text}, {target_lang})
+            prompt: Custom prompt template (supports {content}, {target_lang})
                    If None, uses default from config
             refresh: If True, bypass cache and regenerate (default: False)
 
@@ -77,18 +77,13 @@ class TranslateService:
                 return translated_text.strip(), full_text.strip()
 
         # Call API
-        prompt_text = prompt_template.format(
-            target_lang=target_lang,
-            source_text=source_text,
-        )
+        prompt_text = prompt_template.replace("{content}", source_text).replace("{target_lang}", target_lang)
 
         response = await self.client.post(
             "/chat/completions",
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": prompt_text}],
-                "max_tokens": 2000,
-                "temperature": 0.3,
             },
         )
         response.raise_for_status()

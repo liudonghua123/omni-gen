@@ -97,7 +97,7 @@ TRANSLATE_MODEL=gpt-4o-mini
 TRANSLATE_DEFAULT_TARGET_LANG=en_US
 TRANSLATE_PROMPT=Translate the following text into {target_lang}. Note that you should only output the translated result without any additional explanation:
 
-{source_text}
+{content}
 
 # Explain (Chinese words, idioms, sayings)
 EXPLAIN_BASE_URL=https://api.openai.com/v1
@@ -105,7 +105,7 @@ EXPLAIN_API_KEY=sk-your-explain-api-key
 EXPLAIN_MODEL=gpt-4o-mini
 EXPLAIN_PROMPT=请解释以下中文词语、成语或歇后语，包括其中文含义、英文翻译、以及在句子中的用法示例。注意只输出解释内容，不要有其他说明：
 
-{source_text}
+{content}
 ```
 
 ## Development
