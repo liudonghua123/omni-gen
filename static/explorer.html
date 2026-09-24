@@ -604,6 +604,13 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="translate-simple-prompt">自定义 Prompt（可选，支持 {source_text}、{target_lang}）</label>
+                    <textarea id="translate-simple-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请将以下文本翻译成{target_lang}：&#10;{source_text}"></textarea>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                    <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="translate-simple-refresh"> 跳过缓存，重新生成</label>
+                </div>
+                <div class="form-group">
                     <label>生成的 URL</label>
                     <code id="translate-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
@@ -627,6 +634,13 @@
                         <label for="translate-target-lang">目标语言</label>
                         <input type="text" id="translate-target-lang" placeholder="如: zh_CN, en_US" value="zh_CN">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="translate-prompt">自定义 Prompt（可选，支持 {source_text}、{target_lang}）</label>
+                    <textarea id="translate-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请将以下文本翻译成{target_lang}：&#10;{source_text}"></textarea>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                    <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="translate-refresh"> 跳过缓存，重新生成</label>
                 </div>
                 <button class="btn btn-primary" onclick="testTranslate()">翻译</button>
                 <div id="translate-result" class="result"></div>
@@ -654,6 +668,13 @@
                     <input type="text" id="explain-simple-text" placeholder="输入要解释的内容，如：画蛇添足" value="画蛇添足">
                 </div>
                 <div class="form-group">
+                    <label for="explain-simple-prompt">自定义 Prompt（可选，支持 {source_text}）</label>
+                    <textarea id="explain-simple-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请详细解释以下中文词汇：&#10;{source_text}"></textarea>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                    <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="explain-simple-refresh"> 跳过缓存，重新生成</label>
+                </div>
+                <div class="form-group">
                     <label>生成的 URL</label>
                     <code id="explain-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
@@ -671,6 +692,13 @@
                 <div class="form-group">
                     <label for="explain-text">要解释的中文词语/成语/歇后语</label>
                     <textarea id="explain-text" rows="3" placeholder="输入要解释的内容">画蛇添足</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="explain-prompt">自定义 Prompt（可选，支持 {source_text}）</label>
+                    <textarea id="explain-prompt" rows="2" placeholder="留空使用默认 Prompt，如：请详细解释以下中文词汇：&#10;{source_text}"></textarea>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                    <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="explain-refresh"> 跳过缓存，重新生成</label>
                 </div>
                 <button class="btn btn-primary" onclick="testExplain()">解释</button>
                 <div id="explain-result" class="result"></div>
@@ -714,6 +742,13 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="practise-simple-prompt">自定义 Prompt（可选，支持 {topic}、{count}、{types}）</label>
+                    <textarea id="practise-simple-prompt" rows="2" placeholder="留空使用默认 Prompt"></textarea>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                    <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="practise-simple-refresh"> 跳过缓存，重新生成</label>
+                </div>
+                <div class="form-group">
                     <label>生成的 URL</label>
                     <code id="practise-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
@@ -737,6 +772,13 @@
                         <label for="practise-count">题目数量</label>
                         <input type="number" id="practise-count" min="1" max="20" value="5">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="practise-prompt">自定义 Prompt（可选，支持 {topic}、{count}、{types}）</label>
+                    <textarea id="practise-prompt" rows="2" placeholder="留空使用默认 Prompt"></textarea>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                    <label style="margin:0;font-size:0.85rem;"><input type="checkbox" id="practise-refresh"> 跳过缓存，重新生成</label>
                 </div>
                 <div class="form-group">
                     <label for="practise-types">题目类型 (多选)</label>
@@ -932,15 +974,21 @@
         function updateTranslateSimpleUrl() {
             const text = document.getElementById('translate-simple-text').value.trim();
             const targetLang = document.getElementById('translate-simple-target-lang').value.trim() || 'en_US';
+            const prompt = document.getElementById('translate-simple-prompt').value.trim();
+            const refresh = document.getElementById('translate-simple-refresh').checked;
             if (text) {
                 const encodedText = encodeURIComponent(text);
                 const encodedTargetLang = encodeURIComponent(targetLang);
-                const url = `${BASE_URL}/translate/${encodedText}?target_lang=${encodedTargetLang}`;
+                let url = `${BASE_URL}/translate/${encodedText}?target_lang=${encodedTargetLang}`;
+                if (prompt) url += `&prompt=${encodeURIComponent(prompt)}`;
+                if (refresh) url += `&refresh=true`;
                 document.getElementById('translate-simple-url').textContent = url;
             }
         }
         document.getElementById('translate-simple-text').addEventListener('input', updateTranslateSimpleUrl);
         document.getElementById('translate-simple-target-lang').addEventListener('input', updateTranslateSimpleUrl);
+        document.getElementById('translate-simple-prompt').addEventListener('input', updateTranslateSimpleUrl);
+        document.getElementById('translate-simple-refresh').addEventListener('change', updateTranslateSimpleUrl);
         updateTranslateSimpleUrl();
 
         async function testImageSimple() {
@@ -1064,6 +1112,8 @@
         async function testTranslateSimple() {
             const text = document.getElementById('translate-simple-text').value;
             const targetLang = document.getElementById('translate-simple-target-lang').value || 'en_US';
+            const prompt = document.getElementById('translate-simple-prompt').value.trim() || null;
+            const refresh = document.getElementById('translate-simple-refresh').checked;
 
             if (!text.trim()) {
                 showResult('translate-simple-result', '请输入要翻译的文本', 'error');
@@ -1073,8 +1123,13 @@
             showLoading('translate-simple-result');
 
             try {
-                const encodedText = encodeURIComponent(text);
-                const response = await fetch(`${BASE_URL}/translate/${encodedText}?target_lang=${encodeURIComponent(targetLang)}`);
+                const params = new URLSearchParams({
+                    target_lang: targetLang,
+                });
+                if (prompt) params.set('prompt', prompt);
+                if (refresh) params.set('refresh', 'true');
+
+                const response = await fetch(`${BASE_URL}/translate/${encodeURIComponent(text)}?${params}`);
                 const translatedText = await response.text();
 
                 if (!response.ok) throw new Error(translatedText || '翻译失败');
@@ -1085,6 +1140,7 @@
                     <div class="result-content">
                         <p><strong>源文本:</strong> ${text}</p>
                         <p><strong>目标语言:</strong> ${targetLang}</p>
+                        <p><strong>缓存:</strong> ${refresh ? '已跳过' : '已使用'}</p>
                     </div>
                 `, 'success');
                 document.getElementById('translate-simple-preview').style.display = 'block';
@@ -1097,6 +1153,8 @@
         async function testTranslate() {
             const text = document.getElementById('translate-text').value;
             const targetLang = document.getElementById('translate-target-lang').value || 'en_US';
+            const prompt = document.getElementById('translate-prompt').value.trim() || null;
+            const refresh = document.getElementById('translate-refresh').checked;
             const btn = event.target;
 
             if (!text.trim()) {
@@ -1108,10 +1166,14 @@
             btn.disabled = true;
 
             try {
+                const body = {text, target_lang: targetLang};
+                if (prompt) body.prompt = prompt;
+                if (refresh) body.refresh = true;
+
                 const response = await fetch(`${BASE_URL}/api/v1/translate`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text, target_lang: targetLang}),
+                    body: JSON.stringify(body),
                 });
                 const data = await response.json();
 
@@ -1126,6 +1188,7 @@
                     <div class="result-content">
                         <p><strong>源文本:</strong> ${data.source_text}</p>
                         <p><strong>目标语言:</strong> ${data.target_lang}</p>
+                        <p><strong>缓存:</strong> ${data.cached ? '命中缓存' : '已重新生成'}</p>
                     </div>
                 `, 'success');
                 document.getElementById('translate-preview').style.display = 'block';
@@ -1139,6 +1202,8 @@
 
         async function testExplainSimple() {
             const text = document.getElementById('explain-simple-text').value;
+            const prompt = document.getElementById('explain-simple-prompt').value.trim() || null;
+            const refresh = document.getElementById('explain-simple-refresh').checked;
 
             if (!text.trim()) {
                 showResult('explain-simple-result', '请输入要解释的内容', 'error');
@@ -1148,8 +1213,12 @@
             showLoading('explain-simple-result');
 
             try {
-                const encodedText = encodeURIComponent(text);
-                const response = await fetch(`${BASE_URL}/explain/${encodedText}`);
+                const params = new URLSearchParams();
+                if (prompt) params.set('prompt', prompt);
+                if (refresh) params.set('refresh', 'true');
+
+                const url = `${BASE_URL}/explain/${encodeURIComponent(text)}` + (params.toString() ? `?${params}` : '');
+                const response = await fetch(url);
                 const explainedText = await response.text();
 
                 if (!response.ok) throw new Error(explainedText || '解释失败');
@@ -1159,6 +1228,7 @@
                     <strong>✅ 解释成功</strong>
                     <div class="result-content">
                         <p><strong>源文本:</strong> ${text}</p>
+                        <p><strong>缓存:</strong> ${refresh ? '已跳过' : '已使用'}</p>
                     </div>
                 `, 'success');
                 document.getElementById('explain-simple-preview').style.display = 'block';
@@ -1170,17 +1240,27 @@
 
         function updateExplainSimpleUrl() {
             const text = document.getElementById('explain-simple-text').value.trim();
+            const prompt = document.getElementById('explain-simple-prompt').value.trim();
+            const refresh = document.getElementById('explain-simple-refresh').checked;
             if (text) {
                 const encodedText = encodeURIComponent(text);
-                const url = `${BASE_URL}/explain/${encodedText}`;
+                let url = `${BASE_URL}/explain/${encodedText}`;
+                const params = [];
+                if (prompt) params.push(`prompt=${encodeURIComponent(prompt)}`);
+                if (refresh) params.push('refresh=true');
+                if (params.length) url += '?' + params.join('&');
                 document.getElementById('explain-simple-url').textContent = url;
             }
         }
         document.getElementById('explain-simple-text').addEventListener('input', updateExplainSimpleUrl);
+        document.getElementById('explain-simple-prompt').addEventListener('input', updateExplainSimpleUrl);
+        document.getElementById('explain-simple-refresh').addEventListener('change', updateExplainSimpleUrl);
         updateExplainSimpleUrl();
 
         async function testExplain() {
             const text = document.getElementById('explain-text').value;
+            const prompt = document.getElementById('explain-prompt').value.trim() || null;
+            const refresh = document.getElementById('explain-refresh').checked;
             const btn = event.target;
 
             if (!text.trim()) {
@@ -1192,10 +1272,14 @@
             btn.disabled = true;
 
             try {
+                const body = {text};
+                if (prompt) body.prompt = prompt;
+                if (refresh) body.refresh = true;
+
                 const response = await fetch(`${BASE_URL}/api/v1/explain`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text}),
+                    body: JSON.stringify(body),
                 });
                 const data = await response.json();
 
@@ -1209,6 +1293,7 @@
                     <strong>✅ 解释成功</strong>
                     <div class="result-content">
                         <p><strong>源文本:</strong> ${data.source_text}</p>
+                        <p><strong>缓存:</strong> ${data.cached ? '命中缓存' : '已重新生成'}</p>
                     </div>
                 `, 'success');
                 document.getElementById('explain-preview').style.display = 'block';
@@ -1225,15 +1310,21 @@
             const topic = document.getElementById('practise-simple-topic').value.trim();
             const count = document.getElementById('practise-simple-count').value;
             const types = document.getElementById('practise-simple-types').value;
+            const prompt = document.getElementById('practise-simple-prompt').value.trim();
+            const refresh = document.getElementById('practise-simple-refresh').checked;
             if (topic) {
                 const encodedTopic = encodeURIComponent(topic);
-                const url = `${BASE_URL}/practise/${encodedTopic}?count=${count}&types=${types}`;
-                document.getElementById('practise-simple-url').textContent = url;
+                const params = [`count=${count}`, `types=${encodeURIComponent(types)}`];
+                if (prompt) params.push(`prompt=${encodeURIComponent(prompt)}`);
+                if (refresh) params.push('refresh=true');
+                document.getElementById('practise-simple-url').textContent = `${BASE_URL}/practise/${encodedTopic}?${params.join('&')}`;
             }
         }
         document.getElementById('practise-simple-topic').addEventListener('input', updatePractiseSimpleUrl);
         document.getElementById('practise-simple-count').addEventListener('input', updatePractiseSimpleUrl);
         document.getElementById('practise-simple-types').addEventListener('change', updatePractiseSimpleUrl);
+        document.getElementById('practise-simple-prompt').addEventListener('input', updatePractiseSimpleUrl);
+        document.getElementById('practise-simple-refresh').addEventListener('change', updatePractiseSimpleUrl);
         updatePractiseSimpleUrl();
 
         function renderQuestions(questions, containerId) {
@@ -1301,6 +1392,8 @@
             const topic = document.getElementById('practise-simple-topic').value;
             const count = document.getElementById('practise-simple-count').value;
             const types = document.getElementById('practise-simple-types').value;
+            const prompt = document.getElementById('practise-simple-prompt').value.trim() || null;
+            const refresh = document.getElementById('practise-simple-refresh').checked;
 
             if (!topic.trim()) {
                 showResult('practise-simple-result', '请输入题目主题', 'error');
@@ -1311,8 +1404,14 @@
             document.getElementById('practise-simple-preview').style.display = 'none';
 
             try {
-                const encodedTopic = encodeURIComponent(topic);
-                const response = await fetch(`${BASE_URL}/practise/${encodedTopic}?count=${count}&types=${encodeURIComponent(types)}`);
+                const params = new URLSearchParams({
+                    count: count,
+                    types: types,
+                });
+                if (prompt) params.set('prompt', prompt);
+                if (refresh) params.set('refresh', 'true');
+
+                const response = await fetch(`${BASE_URL}/practise/${encodeURIComponent(topic)}?${params}`);
                 const data = await response.json();
 
                 if (!response.ok) throw new Error(data.detail || '生成失败');
@@ -1323,6 +1422,7 @@
                     <div class="result-content">
                         <p>主题: ${data.topic}</p>
                         <p>题目数量: ${data.count}</p>
+                        <p>缓存: ${data.cached ? '命中缓存' : '已重新生成'}</p>
                     </div>
                 `, 'success');
                 document.getElementById('practise-simple-preview').style.display = 'block';
@@ -1335,6 +1435,8 @@
         async function testPractise() {
             const topic = document.getElementById('practise-topic').value;
             const count = parseInt(document.getElementById('practise-count').value) || 5;
+            const prompt = document.getElementById('practise-prompt').value.trim() || null;
+            const refresh = document.getElementById('practise-refresh').checked;
             const btn = event.target;
 
             // Collect selected types
@@ -1358,10 +1460,14 @@
             document.getElementById('practise-preview').style.display = 'none';
 
             try {
+                const body = {topic, count, types};
+                if (prompt) body.prompt = prompt;
+                if (refresh) body.refresh = true;
+
                 const response = await fetch(`${BASE_URL}/api/v1/practise`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({topic, count, types}),
+                    body: JSON.stringify(body),
                 });
                 const data = await response.json();
 
@@ -1374,6 +1480,7 @@
                         <p>主题: ${data.topic}</p>
                         <p>题目数量: ${data.questions.length}</p>
                         <p>类型: ${data.types.map(t => ({'single_choice': '单选', 'multiple_choice': '多选', 'true_false': '判断'})[t] || t).join(', ')}</p>
+                        <p>缓存: ${data.cached ? '命中缓存' : '已重新生成'}</p>
                     </div>
                 `, 'success');
                 document.getElementById('practise-preview').style.display = 'block';

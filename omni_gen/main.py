@@ -19,17 +19,21 @@ from omni_gen.routes import simple_router
 mcp_app = mcp.http_app(
     path="/mcp",
     transport="streamable-http",
-    stateless_http=True,  # Stateless mode - each request is independent
+    stateless_http=True,
 )
 
-# Create FastAPI app with MCP lifespan
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan context manager for startup/shutdown."""
+    """Lifespan: config init → MCP lifespan → shutdown."""
     from omni_gen.runtime_config import init_config
-    # Initialize database and load config
+
+    # 1. Initialize our own resources first
     init_config()
-    yield
+
+    # 2. Run MCP server lifespan: mcp_app.lifespan is a factory -> AsyncGeneratorContextManager
+    async with mcp_app.lifespan(app):
+        yield
 
 app = FastAPI(
     title="omni-gen API",
