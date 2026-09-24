@@ -4,8 +4,8 @@ import hashlib
 from pathlib import Path
 
 from omni_gen.cache import CacheManager
-from omni_gen.config import get_settings
 from omni_gen.models.base import BaseClient
+from omni_gen.runtime_config import get_runtime_config
 
 
 class ASRService:
@@ -13,11 +13,11 @@ class ASRService:
 
     def __init__(self):
         """Initialize ASR service."""
-        settings = get_settings()
-        self.model = settings.asr_model
+        config = get_runtime_config()
+        self.model = config.get("ASR_MODEL", "whisper-1")
         self.client = BaseClient(
-            base_url=settings.asr_base_url,
-            api_key=settings.asr_api_key,
+            base_url=config.get("ASR_BASE_URL", "https://api.openai.com"),
+            api_key=config.get("ASR_API_KEY", ""),
             model=self.model,
         )
         self.cache = CacheManager("audio")

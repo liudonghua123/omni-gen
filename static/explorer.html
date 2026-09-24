@@ -15,7 +15,7 @@
             background: #0f172a;
             color: #e2e8f0;
             min-height: 100vh;
-            padding: 2rem;
+            padding: 1rem;
         }
         .container {
             max-width: 900px;
@@ -23,35 +23,47 @@
         }
         h1 {
             text-align: center;
-            margin-bottom: 1.5rem;
-            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        /* Tab Navigation */
+        /* Tab Navigation - Responsive */
+        .tabs-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
         .tabs {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
             border-bottom: 1px solid #334155;
             padding-bottom: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
         .tab {
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 0.75rem;
             border-radius: 8px 8px 0 0;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.8rem;
             font-weight: 500;
             background: transparent;
             color: #94a3b8;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.35rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .tab:hover {
             background: #1e293b;
@@ -63,7 +75,7 @@
             border-bottom: 2px solid #667eea;
         }
         .tab .icon {
-            font-size: 1.25rem;
+            font-size: 1rem;
         }
 
         /* Tab Content */
@@ -77,53 +89,59 @@
         .card {
             background: #1e293b;
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1rem;
             border: 1px solid #334155;
+            margin-bottom: 1rem;
         }
         .card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
             font-weight: 500;
             color: #94a3b8;
+            font-size: 0.9rem;
         }
-        input[type="text"], textarea, select, input[type="file"] {
+        input[type="text"], textarea, select, input[type="file"], input[type="number"] {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.65rem;
             border-radius: 8px;
             border: 1px solid #475569;
             background: #0f172a;
             color: #e2e8f0;
             font-size: 1rem;
+            min-height: 44px;
         }
         input[type="file"] {
             background: #1e293b;
+            padding: 0.5rem;
         }
         textarea {
             resize: vertical;
             min-height: 80px;
         }
         .btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.65rem 1.25rem;
             border-radius: 8px;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
             transition: all 0.2s;
+            min-height: 44px;
         }
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            width: 100%;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
@@ -135,8 +153,8 @@
             transform: none;
         }
         .result {
-            margin-top: 1rem;
-            padding: 1rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
             border-radius: 8px;
             display: none;
         }
@@ -161,11 +179,12 @@
         .result-content p {
             margin-bottom: 0.25rem;
             word-break: break-all;
+            font-size: 0.9rem;
         }
         .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid #475569;
             border-top-color: #667eea;
             border-radius: 50%;
@@ -178,33 +197,39 @@
         }
         .row {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
         }
         .row .form-group {
             flex: 1;
+            min-width: 0;
+        }
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
         pre {
             background: #0f172a;
-            padding: 1rem;
+            padding: 0.75rem;
             border-radius: 8px;
             overflow-x: auto;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
         }
         .api-info {
-            margin-top: 2rem;
+            margin-top: 1rem;
         }
 
         /* Preview Styles */
         .preview-container {
-            margin-top: 1rem;
-            padding: 1rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
             background: #0f172a;
             border-radius: 8px;
         }
         .preview-container h3 {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: #94a3b8;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
         .audio-preview audio {
             width: 100%;
@@ -212,31 +237,167 @@
         }
         .image-preview img {
             max-width: 100%;
-            max-height: 400px;
+            max-height: 300px;
             border-radius: 8px;
             display: block;
             margin-top: 0.5rem;
         }
         .text-preview {
             margin-top: 0.5rem;
-            padding: 1rem;
+            padding: 0.75rem;
             background: #1e293b;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             line-height: 1.6;
         }
         .download-btn {
             display: inline-block;
-            margin-top: 0.75rem;
+            margin-top: 0.5rem;
             padding: 0.5rem 1rem;
             background: #334155;
             color: #e2e8f0;
             border-radius: 6px;
             text-decoration: none;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
+            min-height: 36px;
+            line-height: 1.5;
         }
         .download-btn:hover {
             background: #475569;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 640px) {
+            body {
+                padding: 2rem;
+            }
+            .container {
+                max-width: 900px;
+            }
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+            .card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .card h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            label {
+                margin-bottom: 0.5rem;
+                font-size: 1rem;
+            }
+            .tabs {
+                gap: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+            .tab {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+            .tab .icon {
+                font-size: 1.25rem;
+            }
+            .btn {
+                width: auto;
+            }
+            .btn-primary {
+                width: auto;
+            }
+            .btn-row {
+                flex-wrap: nowrap;
+            }
+            .result {
+                margin-top: 1rem;
+                padding: 1rem;
+            }
+            .preview-container {
+                margin-top: 1rem;
+                padding: 1rem;
+            }
+            .image-preview img {
+                max-height: 400px;
+            }
+            .text-preview {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tabs {
+                scroll-padding-left: 0.5rem;
+                scroll-padding-right: 0.5rem;
+            }
+            .tab {
+                padding: 0.5rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .tab .icon {
+                font-size: 0.9rem;
+            }
+            .card h2 .icon {
+                font-size: 1rem;
+            }
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+            .btn-row .btn,
+            .btn-row .download-btn {
+                width: 100%;
+                text-align: center;
+            }
+            .checkbox-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .checkbox-group label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            pre {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Mobile select dropdown for tabs on very small screens */
+        @media (max-width: 400px) {
+            .tabs-wrapper {
+                position: relative;
+            }
+            .tabs {
+                display: none;
+            }
+            .tab-select {
+                display: block;
+                width: 100%;
+                padding: 0.65rem;
+                border-radius: 8px;
+                border: 1px solid #475569;
+                background: #1e293b;
+                color: #e2e8f0;
+                font-size: 1rem;
+                margin-bottom: 1rem;
+                min-height: 44px;
+                cursor: pointer;
+            }
+        }
+        @media (min-width: 401px) {
+            .tab-select {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -245,28 +406,43 @@
         <h1>🎯 omni-gen API 测试</h1>
 
         <!-- Tab Navigation -->
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('tts')">
-                <span class="icon">🔊</span> TTS
-            </button>
-            <button class="tab" onclick="showTab('image')">
-                <span class="icon">🎨</span> 文生图
-            </button>
-            <button class="tab" onclick="showTab('asr')">
-                <span class="icon">🎤</span> ASR
-            </button>
-            <button class="tab" onclick="showTab('translate')">
-                <span class="icon">🌐</span> 翻译
-            </button>
-            <button class="tab" onclick="showTab('explain')">
-                <span class="icon">📖</span> 解释
-            </button>
-            <button class="tab" onclick="showTab('mcp')">
-                <span class="icon">🤖</span> MCP
-            </button>
-            <button class="tab" onclick="showTab('api')">
-                <span class="icon">📡</span> API
-            </button>
+        <div class="tabs-wrapper">
+            <select class="tab-select" id="tab-select" onchange="showTab(this.value)">
+                <option value="tts">🔊 TTS</option>
+                <option value="image">🎨 文生图</option>
+                <option value="asr">🎤 ASR</option>
+                <option value="translate">🌐 翻译</option>
+                <option value="explain">📖 解释</option>
+                <option value="practise">✍️ 练习题</option>
+                <option value="mcp">🤖 MCP</option>
+                <option value="api">📡 API</option>
+            </select>
+            <div class="tabs">
+                <button class="tab active" data-tab="tts" onclick="showTab('tts')">
+                    <span class="icon">🔊</span> TTS
+                </button>
+                <button class="tab" data-tab="image" onclick="showTab('image')">
+                    <span class="icon">🎨</span> 文生图
+                </button>
+                <button class="tab" data-tab="asr" onclick="showTab('asr')">
+                    <span class="icon">🎤</span> ASR
+                </button>
+                <button class="tab" data-tab="translate" onclick="showTab('translate')">
+                    <span class="icon">🌐</span> 翻译
+                </button>
+                <button class="tab" data-tab="explain" onclick="showTab('explain')">
+                    <span class="icon">📖</span> 解释
+                </button>
+                <button class="tab" data-tab="practise" onclick="showTab('practise')">
+                    <span class="icon">✍️</span> 练习题
+                </button>
+                <button class="tab" data-tab="mcp" onclick="showTab('mcp')">
+                    <span class="icon">🤖</span> MCP
+                </button>
+                <button class="tab" data-tab="api" onclick="showTab('api')">
+                    <span class="icon">📡</span> API
+                </button>
+            </div>
         </div>
 
         <!-- TTS Tab Content -->
@@ -289,9 +465,9 @@
                 </div>
                 <div class="form-group">
                     <label>生成的 URL</label>
-                    <code id="tts-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                    <code id="tts-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
-                <div class="row">
+                <div class="btn-row">
                     <button class="btn btn-primary" onclick="testTTSSimple()">🔊 预览音频</button>
                     <a id="tts-simple-download" class="download-btn" href="#" download>下载音频</a>
                 </div>
@@ -342,7 +518,7 @@
                 </div>
                 <div class="form-group">
                     <label>生成的 URL</label>
-                    <code id="image-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                    <code id="image-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
                 <button class="btn btn-primary" onclick="testImageSimple()">🎨 预览图片</button>
 
@@ -429,7 +605,7 @@
                 </div>
                 <div class="form-group">
                     <label>生成的 URL</label>
-                    <code id="translate-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                    <code id="translate-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
                 <button class="btn btn-primary" onclick="testTranslateSimple()">翻译</button>
                 <div id="translate-simple-result" class="result"></div>
@@ -479,7 +655,7 @@
                 </div>
                 <div class="form-group">
                     <label>生成的 URL</label>
-                    <code id="explain-simple-url" style="color: #667eea; word-break: break-all;"></code>
+                    <code id="explain-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
                 </div>
                 <button class="btn btn-primary" onclick="testExplainSimple()">解释</button>
                 <div id="explain-simple-result" class="result"></div>
@@ -512,6 +688,82 @@
             </div>
         </div>
 
+        <!-- Practise Tab Content -->
+        <div id="tab-practise" class="tab-content">
+            <!-- Simple URL Section -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h2><span class="icon">🔗</span> 简易 URL 方式</h2>
+                <div class="form-group">
+                    <label for="practise-simple-topic">题目主题</label>
+                    <input type="text" id="practise-simple-topic" placeholder="输入题目主题，如：Python基础" value="Python基础">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="practise-simple-count">题目数量</label>
+                        <input type="number" id="practise-simple-count" min="1" max="20" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="practise-simple-types">题目类型</label>
+                        <select id="practise-simple-types">
+                            <option value="single_choice,multiple_choice,true_false">全部</option>
+                            <option value="single_choice">单选题</option>
+                            <option value="multiple_choice">多选题</option>
+                            <option value="true_false">判断题</option>
+                            <option value="single_choice,multiple_choice">单选+多选</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>生成的 URL</label>
+                    <code id="practise-simple-url" style="color: #667eea; word-break: break-all; font-size: 0.8rem;"></code>
+                </div>
+                <button class="btn btn-primary" onclick="testPractiseSimple()">✍️ 生成练习题</button>
+                <div id="practise-simple-result" class="result"></div>
+                <div id="practise-simple-preview" class="preview-container" style="display: none;">
+                    <h3>✍️ 练习题预览</h3>
+                    <div id="practise-simple-output"></div>
+                </div>
+            </div>
+
+            <!-- REST API Section -->
+            <div class="card">
+                <h2><span class="icon">🔌</span> REST API 方式</h2>
+                <div class="form-group">
+                    <label for="practise-topic">题目主题</label>
+                    <input type="text" id="practise-topic" placeholder="输入题目主题" value="Python基础">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="practise-count">题目数量</label>
+                        <input type="number" id="practise-count" min="1" max="20" value="5">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="practise-types">题目类型 (多选)</label>
+                    <div class="checkbox-group" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                            <input type="checkbox" id="practise-type-single" value="single_choice" checked>
+                            单选题
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                            <input type="checkbox" id="practise-type-multi" value="multiple_choice" checked>
+                            多选题
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                            <input type="checkbox" id="practise-type-tf" value="true_false" checked>
+                            判断题
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="testPractise()">✍️ 生成练习题</button>
+                <div id="practise-result" class="result"></div>
+                <div id="practise-preview" class="preview-container" style="display: none;">
+                    <h3>✍️ 练习题预览</h3>
+                    <div id="practise-output"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- MCP Tab Content -->
         <div id="tab-mcp" class="tab-content">
             <div class="card">
@@ -520,10 +772,10 @@
 
                 <div class="form-group">
                     <label>MCP 端点</label>
-                    <code id="mcp-endpoint" style="color: #667eea;"></code>
+                    <code id="mcp-endpoint" style="color: #667eea; font-size: 0.8rem; word-break: break-all;"></code>
                 </div>
 
-                <div class="row" style="margin-bottom: 1rem;">
+                <div class="btn-row" style="margin-bottom: 1rem;">
                     <button class="btn btn-primary" onclick="testMCPToolsList()">🔧 列出工具</button>
                 </div>
 
@@ -546,7 +798,7 @@
                     <textarea id="mcp-request" rows="6" style="font-family: monospace;" readonly></textarea>
                 </div>
 
-                <div class="row" style="margin-bottom: 1rem;">
+                <div class="btn-row" style="margin-bottom: 1rem;">
                     <button class="btn btn-primary" onclick="testMCPToolsCall()">⚡ 调用工具</button>
                 </div>
 
@@ -560,15 +812,15 @@
                 <h2><span class="icon">📡</span> API 信息</h2>
                 <div class="form-group">
                     <label>当前服务器</label>
-                    <code id="api-base" style="color: #667eea;"></code>
+                    <code id="api-base" style="color: #667eea; font-size: 0.8rem; word-break: break-all;"></code>
                 </div>
                 <div class="form-group">
                     <label>可用端点</label>
-                    <pre id="api-endpoints"></pre>
+                    <pre id="api-endpoints" style="max-height: 200px;"></pre>
                 </div>
                 <div class="form-group">
                     <label>简易路由示例</label>
-                    <pre id="simple-routes"></pre>
+                    <pre id="simple-routes" style="white-space: pre-wrap; word-break: break-all;"></pre>
                 </div>
             </div>
         </div>
@@ -589,15 +841,24 @@
             "Health": `${BASE_URL}/api/v1/health`,
             "Translate (REST)": `POST ${BASE_URL}/api/v1/translate`,
             "Explain (REST)": `POST ${BASE_URL}/api/v1/explain`,
+            "Practise (REST)": `POST ${BASE_URL}/api/v1/practise`,
         }, null, 2);
-        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png\n${BASE_URL}/translate/Hello?target_lang=zh_CN\n${BASE_URL}/explain/画蛇添足`;
+        document.getElementById('simple-routes').textContent = `${BASE_URL}/tts/你好，世界！.wav\n${BASE_URL}/tts/hello%20world.mp3\n${BASE_URL}/image/a-sunset.png\n${BASE_URL}/translate/Hello?target_lang=zh_CN\n${BASE_URL}/explain/画蛇添足\n${BASE_URL}/practise/Python基础?count=5&types=single_choice,multiple_choice,true_false`;
 
         // Tab switching
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
-            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.querySelector(`.tab[data-tab="${tabName}"]`)?.classList.add('active');
+            // Sync select dropdown
+            const select = document.getElementById('tab-select');
+            if (select) select.value = tabName;
+            // Scroll tab into view on mobile
+            const tabBtn = document.querySelector(`.tab[data-tab="${tabName}"]`);
+            if (tabBtn) {
+                tabBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
         }
 
         function showResult(id, html, type) {
@@ -954,6 +1215,171 @@
 
             } catch (err) {
                 showResult('explain-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Update practise simple URL when input changes
+        function updatePractiseSimpleUrl() {
+            const topic = document.getElementById('practise-simple-topic').value.trim();
+            const count = document.getElementById('practise-simple-count').value;
+            const types = document.getElementById('practise-simple-types').value;
+            if (topic) {
+                const encodedTopic = encodeURIComponent(topic);
+                const url = `${BASE_URL}/practise/${encodedTopic}?count=${count}&types=${types}`;
+                document.getElementById('practise-simple-url').textContent = url;
+            }
+        }
+        document.getElementById('practise-simple-topic').addEventListener('input', updatePractiseSimpleUrl);
+        document.getElementById('practise-simple-count').addEventListener('input', updatePractiseSimpleUrl);
+        document.getElementById('practise-simple-types').addEventListener('change', updatePractiseSimpleUrl);
+        updatePractiseSimpleUrl();
+
+        function renderQuestions(questions, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let html = '';
+            questions.forEach((q, index) => {
+                const qNum = index + 1;
+                const typeLabels = {
+                    'single_choice': '单选题',
+                    'multiple_choice': '多选题',
+                    'true_false': '判断题'
+                };
+                const typeLabel = typeLabels[q.type] || q.type;
+
+                html += `<div style="background: #1e293b; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <span style="background: #667eea; color: white; padding: 0.125rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">${typeLabel}</span>
+                        <span style="color: #94a3b8; font-size: 0.875rem;">题目 ${qNum}</span>
+                    </div>
+                    <p style="margin-bottom: 0.75rem; font-weight: 500;">${q.title}</p>`;
+
+                if (q.type === 'true_false') {
+                    html += `<div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                            <input type="radio" name="answer-${index}" value="true"> 正确
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                            <input type="radio" name="answer-${index}" value="false"> 错误
+                        </label>
+                    </div>`;
+                } else if (q.options && q.options.length > 0) {
+                    html += `<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;">`;
+                    q.options.forEach(opt => {
+                        const optKey = opt.charAt(0);
+                        html += `<label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; padding: 0.5rem; background: #0f172a; border-radius: 6px;">
+                            <input type="${q.type === 'multiple_choice' ? 'checkbox' : 'radio'}" name="answer-${index}" value="${optKey}">
+                            <span>${opt}</span>
+                        </label>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Show answer and analysis toggle
+                html += `<button onclick="toggleAnswer(${index})" style="background: #334155; color: #e2e8f0; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-bottom: 0.5rem;">查看答案</button>
+                    <div id="answer-${index}" style="display: none; margin-top: 0.5rem; padding: 0.75rem; background: #0f172a; border-radius: 6px;">
+                        <p style="color: #10b981; font-weight: 500; margin-bottom: 0.5rem;">答案: ${Array.isArray(q.answer) ? q.answer.join(', ') : q.answer}</p>
+                        <p style="color: #94a3b8; font-size: 0.875rem;"><strong>解析:</strong> ${q.analysis}</p>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleAnswer(index) {
+            const answerDiv = document.getElementById(`answer-${index}`);
+            if (answerDiv) {
+                answerDiv.style.display = answerDiv.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        async function testPractiseSimple() {
+            const topic = document.getElementById('practise-simple-topic').value;
+            const count = document.getElementById('practise-simple-count').value;
+            const types = document.getElementById('practise-simple-types').value;
+
+            if (!topic.trim()) {
+                showResult('practise-simple-result', '请输入题目主题', 'error');
+                return;
+            }
+
+            showLoading('practise-simple-result');
+            document.getElementById('practise-simple-preview').style.display = 'none';
+
+            try {
+                const encodedTopic = encodeURIComponent(topic);
+                const response = await fetch(`${BASE_URL}/practise/${encodedTopic}?count=${count}&types=${encodeURIComponent(types)}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || '生成失败');
+
+                renderQuestions(data.questions, 'practise-simple-output');
+                showResult('practise-simple-result', `
+                    <strong>✅ 生成成功!</strong>
+                    <div class="result-content">
+                        <p>主题: ${data.topic}</p>
+                        <p>题目数量: ${data.count}</p>
+                    </div>
+                `, 'success');
+                document.getElementById('practise-simple-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('practise-simple-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
+            }
+        }
+
+        async function testPractise() {
+            const topic = document.getElementById('practise-topic').value;
+            const count = parseInt(document.getElementById('practise-count').value) || 5;
+            const btn = event.target;
+
+            // Collect selected types
+            const types = [];
+            if (document.getElementById('practise-type-single').checked) types.push('single_choice');
+            if (document.getElementById('practise-type-multi').checked) types.push('multiple_choice');
+            if (document.getElementById('practise-type-tf').checked) types.push('true_false');
+
+            if (!topic.trim()) {
+                showResult('practise-result', '请输入题目主题', 'error');
+                return;
+            }
+
+            if (types.length === 0) {
+                showResult('practise-result', '请至少选择一种题目类型', 'error');
+                return;
+            }
+
+            showLoading('practise-result');
+            btn.disabled = true;
+            document.getElementById('practise-preview').style.display = 'none';
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/practise`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({topic, count, types}),
+                });
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || '生成失败');
+
+                renderQuestions(data.questions, 'practise-output');
+                showResult('practise-result', `
+                    <strong>✅ 生成成功!</strong>
+                    <div class="result-content">
+                        <p>主题: ${data.topic}</p>
+                        <p>题目数量: ${data.questions.length}</p>
+                        <p>类型: ${data.types.map(t => ({'single_choice': '单选', 'multiple_choice': '多选', 'true_false': '判断'})[t] || t).join(', ')}</p>
+                    </div>
+                `, 'success');
+                document.getElementById('practise-preview').style.display = 'block';
+
+            } catch (err) {
+                showResult('practise-result', `<strong>❌ 错误:</strong> ${err.message}`, 'error');
             } finally {
                 btn.disabled = false;
             }

@@ -1,6 +1,7 @@
 """REST API routes for omni-gen."""
 
-from pathlib import Path
+import logging
+import traceback
 from typing import Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -8,7 +9,16 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from omni_gen.config import get_settings
-from omni_gen.services import ASRService, ExplainService, ImageService, TTSService, TranslateService
+from omni_gen.services import (
+    ASRService,
+    ExplainService,
+    ImageService,
+    PractiseService,
+    TranslateService,
+    TTSService,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1")
 
@@ -58,6 +68,8 @@ class ASRResponse(BaseModel):
 class TranslateRequest(BaseModel):
     text: str
     target_lang: str = "en_US"
+    prompt: Optional[str] = None
+    refresh: bool = False
 
 
 class TranslateResponse(BaseModel):
@@ -66,6 +78,13 @@ class TranslateResponse(BaseModel):
     translated_full_text: str
     source_text: str
     target_lang: str
+    cached: bool = False
+
+
+class ExplainRequest(BaseModel):
+    text: str
+    prompt: Optional[str] = None
+    refresh: bool = False
 
 
 class ExplainResponse(BaseModel):
@@ -73,6 +92,24 @@ class ExplainResponse(BaseModel):
     explained_text: str
     explained_full_text: str
     source_text: str
+    cached: bool = False
+
+
+class PractiseRequest(BaseModel):
+    topic: str
+    count: int = 5
+    types: list[str] = ["single_choice", "multiple_choice", "true_false"]
+    prompt: Optional[str] = None
+    refresh: bool = False
+
+
+class PractiseResponse(BaseModel):
+    success: bool
+    questions: list[dict]
+    practise_full_text: str
+    topic: str
+    count: int
+    types: list[str]
 
 
 # TTS Routes
@@ -123,22 +160,6 @@ async def synthesize_simple(text_and_format: str):
             path=str(path),
             media_type=media_type,
         )
-    finally:
-        await service.close()
-
-
-# Simple translate route: /translate/hello?target_lang=zh_CN (returns plain text)
-@simple_router.get("/translate/{text}")
-async def translate_simple(text: str, target_lang: str | None = None):
-    """Simple translate route: /translate/text?target_lang=xx_XX
-
-    Returns plain text translation.
-    """
-    service = TranslateService()
-    try:
-        translated_text, _ = await service.translate(text, target_lang)
-        from fastapi.responses import PlainTextResponse
-        return PlainTextResponse(translated_text)
     finally:
         await service.close()
 
@@ -219,53 +240,160 @@ async def health_check():
 
 
 # Translate Routes
-@router.post("/translate", response_model=TranslateResponse)
+@router.post("/translate")
 async def translate_text(request: TranslateRequest):
     """Translate text using AI (REST API)."""
     service = TranslateService()
     try:
-        translated_text, full_text = await service.translate(request.text, request.target_lang)
-        settings = get_settings()
-        return TranslateResponse(
-            success=True,
-            translated_text=translated_text,
-            translated_full_text=full_text,
-            source_text=request.text,
-            target_lang=request.target_lang or settings.translate_default_target_lang,
+        translated_text, full_text = await service.translate(
+            request.text, request.target_lang, request.prompt, request.refresh
         )
+        settings = get_settings()
+        return {
+            "success": True,
+            "translated_text": translated_text,
+            "translated_full_text": full_text,
+            "source_text": request.text,
+            "target_lang": request.target_lang or settings.translate_default_target_lang,
+            "cached": not request.refresh,
+        }
+    finally:
+        await service.close()
+
+
+# Simple translate route: /translate/hello?target_lang=zh_CN (returns plain text)
+@simple_router.get("/translate/{text}")
+async def translate_simple(
+    text: str,
+    target_lang: str | None = None,
+    prompt: str | None = None,
+    refresh: bool = False,
+):
+    """Simple translate route: /translate/text?target_lang=xx_XX&prompt=...&refresh=false
+
+    Returns plain text translation.
+    """
+    service = TranslateService()
+    try:
+        translated_text, _ = await service.translate(text, target_lang, prompt, refresh)
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse(translated_text)
     finally:
         await service.close()
 
 
 # Explain Routes
-@router.post("/explain", response_model=ExplainResponse)
-async def explain_text(request: TranslateRequest):
+@router.post("/explain")
+async def explain_text(request: ExplainRequest):
     """Explain Chinese text (words, idioms, sayings) using AI."""
     service = ExplainService()
     try:
-        explained_text, full_text = await service.explain(request.text)
-        return ExplainResponse(
-            success=True,
-            explained_text=explained_text,
-            explained_full_text=full_text,
-            source_text=request.text,
+        explained_text, full_text = await service.explain(
+            request.text, request.prompt, request.refresh
         )
+        return {
+            "success": True,
+            "explained_text": explained_text,
+            "explained_full_text": full_text,
+            "source_text": request.text,
+            "cached": not request.refresh,
+        }
     finally:
         await service.close()
 
 
 # Simple explain route: /explain/hello (returns plain text)
 @simple_router.get("/explain/{text}")
-async def explain_simple(text: str):
-    """Simple explain route: /explain/text
+async def explain_simple(
+    text: str,
+    prompt: str | None = None,
+    refresh: bool = False,
+):
+    """Simple explain route: /explain/text?prompt=...&refresh=false
 
     Returns plain text explanation.
     """
     service = ExplainService()
     try:
-        explained_text, _ = await service.explain(text)
+        explained_text, _ = await service.explain(text, prompt, refresh)
         from fastapi.responses import PlainTextResponse
         return PlainTextResponse(explained_text)
+    finally:
+        await service.close()
+
+
+# Practise Routes
+@router.post("/practise")
+async def generate_practise(request: PractiseRequest):
+    """Generate practise questions using AI."""
+    logger.info(f"[Routes] Practise request: topic={request.topic}, count={request.count}, types={request.types}")
+    service = PractiseService()
+    try:
+        logger.info("[Routes] Calling service.generate_practise...")
+        questions, full_text = await service.generate_practise(
+            request.topic, request.count, request.types, request.prompt, request.refresh
+        )
+        logger.info(f"[Routes] Got {len(questions)} questions")
+
+        response_data = {
+            "success": True,
+            "questions": questions,
+            "practise_full_text": full_text,
+            "topic": request.topic,
+            "count": request.count,
+            "types": request.types,
+            "cached": not request.refresh,
+        }
+        logger.info(f"[Routes] Returning response with {len(questions)} questions")
+        from fastapi.responses import JSONResponse
+        return JSONResponse(content=response_data)
+    except Exception as e:
+        logger.error(f"[Routes] Practise error: {type(e).__name__}: {e}")
+        logger.error(f"[Routes] Traceback: {traceback.format_exc()}")
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content={"success": False, "error": f"{type(e).__name__}: {str(e)}"},
+            status_code=500
+        )
+    finally:
+        await service.close()
+
+
+# Simple practise route: /practise/Python基础
+@simple_router.get("/practise/{topic}")
+async def practise_simple(
+    topic: str,
+    count: int = 5,
+    types: str = "single_choice,multiple_choice,true_false",
+    prompt: str | None = None,
+    refresh: bool = False,
+):
+    """Simple practise route: /practise/topic?count=5&types=single_choice&prompt=...&refresh=false
+
+    Returns JSON with questions.
+    """
+    logger.info(f"[SimplePractise] topic={topic}, count={count}, types={types}, prompt={prompt is not None}, refresh={refresh}")
+    type_list = [t.strip() for t in types.split(",") if t.strip()]
+    service = PractiseService()
+    try:
+        logger.info("[SimplePractise] Calling service...")
+        questions, _ = await service.generate_practise(topic, count, type_list, prompt, refresh)
+        logger.info(f"[SimplePractise] Got {len(questions)} questions")
+        from fastapi.responses import JSONResponse
+        return JSONResponse({
+            "success": True,
+            "topic": topic,
+            "count": len(questions),
+            "types": type_list,
+            "questions": questions,
+            "cached": not refresh,
+        })
+    except Exception as e:
+        logger.error(f"[SimplePractise] Error: {type(e).__name__}: {e}")
+        import traceback
+        logger.error(f"[SimplePractise] Traceback: {traceback.format_exc()}")
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"success": False, "error": f"{type(e).__name__}: {str(e)}"}, status_code=500)
     finally:
         await service.close()
 

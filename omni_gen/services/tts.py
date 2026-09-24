@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Optional
 
 from omni_gen.cache import CacheManager
-from omni_gen.config import get_settings
 from omni_gen.models.base import BaseClient
+from omni_gen.runtime_config import get_runtime_config
 
 
 class TTSService:
@@ -15,14 +15,14 @@ class TTSService:
 
     def __init__(self):
         """Initialize TTS service."""
-        settings = get_settings()
-        self.model = settings.tts_model
+        config = get_runtime_config()
+        self.model = config.get("TTS_MODEL", "tts-1")
         self.client = BaseClient(
-            base_url=settings.tts_base_url,
-            api_key=settings.tts_api_key,
+            base_url=config.get("TTS_BASE_URL", "https://api.openai.com"),
+            api_key=config.get("TTS_API_KEY", ""),
             model=self.model,
         )
-        self.default_format = settings.tts_default_format
+        self.default_format = config.get("TTS_DEFAULT_FORMAT", "mp3")
         self.cache = CacheManager("audio")
 
     async def synthesize(

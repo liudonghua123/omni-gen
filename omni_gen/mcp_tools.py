@@ -3,7 +3,14 @@
 from fastmcp import FastMCP
 
 from omni_gen.config import get_settings
-from omni_gen.services import ASRService, ExplainService, ImageService, TTSService, TranslateService
+from omni_gen.services import (
+    ASRService,
+    ExplainService,
+    ImageService,
+    PractiseService,
+    TranslateService,
+    TTSService,
+)
 
 # Create MCP server instance
 mcp = FastMCP("omni-gen AI Tools")
@@ -120,26 +127,31 @@ async def speech_to_text(
 @mcp.tool
 async def translate_text(
     text: str,
-    target_lang: str = "en_US"
+    target_lang: str = "en_US",
+    prompt: str | None = None,
+    refresh: bool = False,
 ) -> dict:
     """Translate text to target language.
 
     Args:
         text: Text to translate
         target_lang: Target language code (e.g., "en_US", "zh_CN")
+        prompt: Custom prompt template (optional)
+        refresh: If True, bypass cache and regenerate (default: False)
 
     Returns:
         Dictionary with translated text and metadata
     """
     service = TranslateService()
     try:
-        translated_text, full_text = await service.translate(text, target_lang)
+        translated_text, full_text = await service.translate(text, target_lang, prompt, refresh)
         return {
             "success": True,
             "translated_text": translated_text,
             "translated_full_text": full_text,
             "source_text": text,
             "target_lang": target_lang,
+            "cached": not refresh,
         }
     finally:
         await service.close()
@@ -147,23 +159,73 @@ async def translate_text(
 
 # Explain Tools
 @mcp.tool
-async def explain_text(text: str) -> dict:
+async def explain_text(
+    text: str,
+    prompt: str | None = None,
+    refresh: bool = False,
+) -> dict:
     """Explain Chinese text (words, idioms, sayings).
 
     Args:
         text: Chinese text to explain
+        prompt: Custom prompt template (optional)
+        refresh: If True, bypass cache and regenerate (default: False)
 
     Returns:
         Dictionary with explained text and metadata
     """
     service = ExplainService()
     try:
-        explained_text, full_text = await service.explain(text)
+        explained_text, full_text = await service.explain(text, prompt, refresh)
         return {
             "success": True,
             "explained_text": explained_text,
             "explained_full_text": full_text,
             "source_text": text,
+            "cached": not refresh,
+        }
+    finally:
+        await service.close()
+
+
+# Practise Tools
+@mcp.tool
+async def generate_practise(
+    topic: str,
+    count: int = 5,
+    types: str = "single_choice,multiple_choice,true_false",
+    prompt: str | None = None,
+    refresh: bool = False,
+) -> dict:
+    """Generate practise questions based on a topic.
+
+    Args:
+        topic: The topic/theme for generating questions
+        count: Number of questions to generate (default: 5)
+        types: Comma-separated question types:
+               - single_choice (单选题)
+               - multiple_choice (多选题)
+               - true_false (判断题)
+               (default: all types)
+        prompt: Custom prompt template (optional)
+        refresh: If True, bypass cache and regenerate (default: False)
+
+    Returns:
+        Dictionary with generated questions and metadata
+    """
+    type_list = [t.strip() for t in types.split(",") if t.strip()]
+    service = PractiseService()
+    try:
+        questions, full_text = await service.generate_practise(topic, count, type_list, prompt, refresh)
+        return {
+            "success": True,
+            "topic": topic,
+            "count": len(questions),
+            "total_requested": count,
+            "types": type_list,
+            "questions": questions,
+            "practise_full_text": full_text,
+            "cached": not refresh,
         }
     finally:
         await service.close()

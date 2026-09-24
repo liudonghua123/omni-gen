@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Main FastAPI application for omni-gen with MCP support."""
 
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
+from omni_gen.admin import router as admin_router
 from omni_gen.config import get_settings
 from omni_gen.mcp_tools import mcp
-from omni_gen.routes import router as api_router, simple_router
+from omni_gen.routes import router as api_router
+from omni_gen.routes import simple_router
 
 # Create ASGI app from MCP server (streamable-http stateless transport)
 mcp_app = mcp.http_app(
@@ -20,11 +23,19 @@ mcp_app = mcp.http_app(
 )
 
 # Create FastAPI app with MCP lifespan
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup/shutdown."""
+    from omni_gen.runtime_config import init_config
+    # Initialize database and load config
+    init_config()
+    yield
+
 app = FastAPI(
     title="omni-gen API",
     description="AI Generation API Server with REST and MCP support",
     version="0.1.0",
-    lifespan=mcp_app.lifespan,  # Key: pass lifespan to FastAPI
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -46,6 +57,7 @@ app.mount("/ai", mcp_app)
 # Include REST API routes
 app.include_router(api_router)
 app.include_router(simple_router)
+app.include_router(admin_router)
 
 
 @app.get("/explorer.html", response_class=HTMLResponse)

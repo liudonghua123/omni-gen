@@ -40,14 +40,34 @@ class BaseClient:
             await self._client.aclose()
             self._client = None
 
+    def _check_response(self, response: httpx.Response) -> None:
+        """Check response and raise for status if needed.
+
+        Args:
+            response: HTTP response object
+
+        Raises:
+            httpx.HTTPStatusError: If response indicates an error
+        """
+        # httpx 0.28+ uses is_success instead of ok
+        if hasattr(response, "is_success"):
+            if not response.is_success:
+                response.raise_for_status()
+        elif not response.ok:  # pragma: no cover
+            response.raise_for_status()
+
     async def post(
         self, path: str, json: Optional[dict[str, Any]] = None, **kwargs
     ) -> httpx.Response:
         """Make POST request to API."""
         url = f"{self.base_url}{path}"
-        return await self.client.post(url, json=json, **kwargs)
+        response = await self.client.post(url, json=json, **kwargs)
+        self._check_response(response)
+        return response
 
     async def get(self, path: str, **kwargs) -> httpx.Response:
         """Make GET request to API."""
         url = f"{self.base_url}{path}"
-        return await self.client.get(url, **kwargs)
+        response = await self.client.get(url, **kwargs)
+        self._check_response(response)
+        return response
